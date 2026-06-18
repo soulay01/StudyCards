@@ -1,0 +1,7 @@
+studycards/ansichten/LernModus.class
+studycards/ansichten/KartenVerwaltung.class
+studycards/model/Lernset.class
+studycards/Main.class
+studycards/datenbank/DatenbankManager.class
+studycards/ansichten/HauptFenster.class
+studycards/model/Lernkarte.class
