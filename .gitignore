@@ -4,3 +4,4 @@ target/
 *.mv.db
 .idea/
 *.iml
+.DS_Store
