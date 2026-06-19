@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyCards — Semesterprojekt</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Fira+Code:wght@400;500;600&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   CSS CUSTOM PROPERTIES — Amber Notebook Theme
+   Change :root values to retheme the entire deck
+   ============================================================ */
+:root {
+  --cream:       #F7F3EC;
+  --cream2:      #EDE8DF;
+  --cream3:      #E2DBCF;
+  --amber:       #C4832A;
+  --amber-light: #E8A84B;
+  --amber-faint: rgba(196,131,42,0.10);
+  --amber-border: rgba(196,131,42,0.22);
+  --ink:         #1C1915;
+  --ink2:        #3D3830;
+  --muted:       #8C8278;
+  --muted2:      #B0A89E;
+  --white:       #FFFFFF;
+
+  --font-serif:  'Instrument Serif', Georgia, serif;
+  --font-mono:   'Fira Code', 'Courier New', monospace;
+  --font-sans:   'Sora', system-ui, sans-serif;
+
+  --sidebar-w:   120px;
+  --ease:        cubic-bezier(0.16, 1, 0.3, 1);
+  --dur:         0.6s;
+
+  --stage-bg: var(--cream);
+}
+
+/* ============================================================
+   RESET
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ============================================================
+   VIEWPORT BASE — Fixed 16:9 stage, 1920×1080
+   ============================================================ */
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #2a2620;
+}
+.deck-viewport {
+  position: fixed; inset: 0;
+  overflow: hidden;
+  background: #2a2620;
+}
+.deck-stage {
+  position: absolute; left: 0; top: 0;
+  width: 1920px; height: 1080px;
+  overflow: hidden;
+  transform-origin: 0 0;
+  background: var(--cream);
+}
+.slide {
+  position: absolute; inset: 0;
+  width: 1920px; height: 1080px;
+  overflow: hidden;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  background: var(--cream);
+  font-family: var(--font-sans);
+}
+.slide.active {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1;
+}
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+}
+@media print {
+  html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+  .deck-viewport { position: static; overflow: visible; background: #fff; }
+  .deck-stage { position: static; width: auto; height: auto; transform: none !important; }
+  .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; width: 1920px; height: 1080px; break-after: page; }
+  .slide:last-child { break-after: auto; }
+  .deck-controls, .edit-hotzone, .edit-toggle { display: none !important; }
+}
+
+/* ============================================================
+   REVEAL ANIMATIONS — triggered by .visible class
+   ============================================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.reveal.from-left {
+  transform: translateX(-28px);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.slide.visible .reveal.from-left { opacity: 1; transform: translateX(0); }
+.reveal.scale-in {
+  transform: scale(0.94);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.slide.visible .reveal.scale-in { opacity: 1; transform: scale(1); }
+
+/* stagger delays */
+.d1 { transition-delay: 0.08s; }
+.d2 { transition-delay: 0.18s; }
+.d3 { transition-delay: 0.28s; }
+.d4 { transition-delay: 0.38s; }
+.d5 { transition-delay: 0.48s; }
+.d6 { transition-delay: 0.56s; }
+.d7 { transition-delay: 0.64s; }
+
+/* ============================================================
+   SHARED LAYOUT COMPONENTS
+   ============================================================ */
+
+/* Notebook ruling lines — on every slide */
+.slide::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(
+    transparent, transparent 53px,
+    rgba(196,131,42,0.07) 53px, rgba(196,131,42,0.07) 54px
+  );
+  pointer-events: none; z-index: 0;
+}
+
+/* Black left sidebar */
+.sidebar {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--ink);
+  z-index: 2;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 72px 0 60px;
+}
+.sidebar-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--amber-light);
+  flex-shrink: 0;
+}
+.sidebar-rule {
+  width: 1px; flex: 1;
+  background: rgba(255,255,255,0.10);
+  margin: 24px 0;
+}
+.sidebar-label {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: rgba(255,255,255,0.28);
+  writing-mode: vertical-rl;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Amber top bar */
+.topbar {
+  position: absolute;
+  top: 0; left: var(--sidebar-w); right: 0;
+  height: 8px;
+  background: var(--amber);
+  z-index: 2;
+}
+
+/* Slide number (bottom-right) */
+.slide-num {
+  position: absolute;
+  bottom: 44px; right: 64px;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--muted2);
+  letter-spacing: 0.1em;
+  z-index: 2;
+}
+
+/* Slide header (used on content slides) */
+.slide-header {
+  position: absolute;
+  top: 56px; left: calc(var(--sidebar-w) + 80px);
+  right: 80px;
+  z-index: 2;
+  border-bottom: 1.5px solid var(--amber-border);
+  padding-bottom: 28px;
+}
+.slide-header .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  color: var(--amber);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+.slide-header h2 {
+  font-family: var(--font-serif);
+  font-size: 72px;
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.slide-header .sub {
+  font-family: var(--font-sans);
+  font-size: 24px;
+  font-weight: 300;
+  color: var(--muted);
+  margin-top: 10px;
+}
+
+/* Card component */
+.card {
+  background: var(--white);
+  border: 1px solid var(--amber-border);
+  padding: 40px 44px;
+  position: relative;
+}
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0;
+  width: 4px; height: 100%;
+}
+.card.c-amber::before { background: var(--amber); }
+.card.c-ink::before   { background: var(--ink); }
+.card.c-muted::before { background: var(--muted2); }
+
+.card-label {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+.card-title {
+  font-family: var(--font-serif);
+  font-size: 38px;
+  color: var(--ink);
+  margin-bottom: 20px;
+  line-height: 1.1;
+}
+.card-body {
+  font-family: var(--font-sans);
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--ink2);
+  line-height: 1.7;
+}
+.card-solution {
+  font-family: var(--font-sans);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--amber);
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--amber-border);
+  line-height: 1.5;
+}
+
+
+/* ============================================================
+   SLIDE 1 — TITLE
+   ============================================================ */
+.slide-title .main-content {
+  position: absolute;
+  top: 140px; left: calc(var(--sidebar-w) + 80px);
+  width: 1100px; z-index: 2;
+}
+.slide-title .eyebrow-tag {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  color: var(--amber);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 36px;
+}
+.slide-title .big-title {
+  font-family: var(--font-serif);
+  font-size: 220px;
+  line-height: 0.82;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+}
+.slide-title .big-title em {
+  font-style: italic;
+  color: var(--amber);
+}
+.slide-title .title-rule {
+  width: 360px; height: 2px;
+  background: var(--amber);
+  margin: 52px 0 44px;
+}
+.slide-title .sub-block {
+  display: flex; gap: 28px; align-items: flex-start;
+}
+.slide-title .sub-stripe {
+  width: 4px; height: 88px;
+  background: var(--amber); flex-shrink: 0; margin-top: 4px;
+}
+.slide-title .sub-text {
+  font-family: var(--font-sans);
+  font-size: 30px; font-weight: 300;
+  color: var(--ink2); line-height: 1.6;
+}
+
+/* Right info panel */
+.slide-title .info-panel {
+  position: absolute;
+  top: 140px; right: 80px;
+  width: 420px; z-index: 2;
+}
+.info-card {
+  background: var(--cream2);
+  border: 1px solid var(--amber-border);
+  padding: 38px 44px;
+  margin-bottom: 14px;
+}
+.info-card .lbl { font-family: var(--font-mono); font-size: 16px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); margin-bottom: 12px; }
+.info-card .val { font-family: var(--font-sans); font-size: 30px; font-weight: 600; color: var(--ink); }
+.info-card.amber-card { background: var(--amber); }
+.info-card.amber-card .lbl { color: rgba(255,255,255,0.65); }
+.info-card.amber-card .val { color: #fff; font-size: 26px; font-weight: 400; line-height: 1.55; }
+
+/* Footer on title slide */
+.slide-title .footer-bar {
+  position: absolute;
+  bottom: 52px; left: calc(var(--sidebar-w) + 80px); right: 80px;
+  display: flex; align-items: center; gap: 28px; z-index: 2;
+}
+.footer-rule { flex: 1; height: 1px; background: rgba(28,25,21,0.14); }
+.footer-mono { font-family: var(--font-mono); font-size: 17px; color: var(--muted2); letter-spacing: 0.07em; text-transform: uppercase; }
+
+
+/* ============================================================
+   SLIDE 2 — ZUSAMMENFASSUNG
+   ============================================================ */
+.slide-summary .cards-row {
+  position: absolute;
+  top: 248px; left: calc(var(--sidebar-w) + 80px); right: 80px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  bottom: 60px;
+}
+.slide-summary .sum-card {
+  background: var(--white);
+  border: 1px solid var(--amber-border);
+  padding: 44px 44px 40px;
+  display: flex; flex-direction: column;
+}
+.sum-card .sc-icon {
+  font-family: var(--font-mono);
+  font-size: 18px; color: var(--amber);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: 20px;
+}
+.sum-card .sc-head {
+  font-family: var(--font-serif);
+  font-size: 46px; color: var(--ink);
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--amber-border);
+  line-height: 1.1;
+}
+.sum-card ul {
+  list-style: none;
+  display: flex; flex-direction: column; gap: 14px;
+  flex: 1;
+}
+.sum-card li {
+  font-family: var(--font-sans);
+  font-size: 22px; font-weight: 300;
+  color: var(--ink2); line-height: 1.5;
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.sum-card li::before {
+  content: '→';
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--amber);
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+
+/* ============================================================
+   SLIDE 3 — HERAUSFORDERUNGEN
+   ============================================================ */
+.slide-challenges .cards-grid {
+  position: absolute;
+  top: 248px; left: calc(var(--sidebar-w) + 80px); right: 80px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 24px;
+  bottom: 60px;
+}
+.ch-card {
+  background: var(--white);
+  border: 1px solid var(--amber-border);
+  padding: 36px 44px;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.ch-card .ch-num {
+  font-family: var(--font-mono);
+  font-size: 16px; color: var(--amber);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.ch-card .ch-title {
+  font-family: var(--font-serif);
+  font-size: 40px; color: var(--ink);
+  margin-bottom: 14px; line-height: 1.1;
+}
+.ch-card .ch-problem {
+  font-family: var(--font-sans);
+  font-size: 21px; font-weight: 300;
+  color: var(--muted);
+  line-height: 1.55; flex: 1;
+}
+.ch-card .ch-solution {
+  font-family: var(--font-sans);
+  font-size: 21px; font-weight: 600;
+  color: var(--amber);
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--amber-border);
+  line-height: 1.45;
+}
+.ch-card .ch-solution::before { content: '✓ '; }
+
+
+/* ============================================================
+   SLIDE 4 — ARCHITEKTUR
+   ============================================================ */
+.slide-arch .diagram {
+  position: absolute;
+  top: 248px; left: calc(var(--sidebar-w) + 80px); right: 80px;
+  display: flex; flex-direction: column; gap: 0;
+  bottom: 60px;
+  justify-content: center;
+}
+.arch-layer {
+  display: flex; align-items: stretch;
+  position: relative;
+}
+.arch-bar {
+  width: 8px; flex-shrink: 0;
+}
+.arch-block {
+  flex: 1;
+  padding: 26px 52px;
+  display: flex; align-items: center; justify-content: space-between;
+  border: 1px solid var(--amber-border);
+  margin-left: 0;
+}
+.arch-block.main-block  { background: var(--ink); }
+.arch-block.view-block  { background: var(--cream2); }
+.arch-block.db-block    { background: var(--cream3); }
+.arch-block.model-block { background: var(--cream2); }
+
+.arch-label {
+  font-family: var(--font-serif);
+  font-size: 44px;
+  letter-spacing: -0.01em;
+}
+.arch-block.main-block  .arch-label { color: #fff; }
+.arch-block.view-block  .arch-label { color: var(--ink); }
+.arch-block.db-block    .arch-label { color: var(--ink); }
+.arch-block.model-block .arch-label { color: var(--ink); }
+
+.arch-desc {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  letter-spacing: 0.04em;
+}
+.arch-block.main-block  .arch-desc { color: rgba(255,255,255,0.55); }
+.arch-block.view-block  .arch-desc { color: var(--muted); }
+.arch-block.db-block    .arch-desc { color: var(--muted); }
+.arch-block.model-block .arch-desc { color: var(--muted); }
+
+.arch-arrow {
+  display: flex; justify-content: flex-start;
+  padding: 6px 0 6px calc(8px + 52px);
+  font-family: var(--font-mono);
+  font-size: 22px;
+  color: var(--muted2);
+}
+
+.arch-db-row {
+  display: flex; align-items: center;
+  padding: 22px 52px;
+  margin-left: 8px;
+  border: 1px dashed var(--amber-border);
+  background: transparent;
+  margin-top: 6px;
+}
+.arch-db-row .db-lbl {
+  font-family: var(--font-mono);
+  font-size: 19px; color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+
+/* ============================================================
+   SLIDE 5 — JAVAFX APIS
+   ============================================================ */
+.slide-apis .api-grid {
+  position: absolute;
+  top: 248px; left: calc(var(--sidebar-w) + 80px); right: 80px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 24px;
+  bottom: 60px;
+}
+.api-card {
+  background: var(--white);
+  border: 1px solid var(--amber-border);
+  padding: 36px 44px;
+}
+.api-card .api-head {
+  font-family: var(--font-serif);
+  font-size: 42px; color: var(--ink);
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1.5px solid var(--amber);
+  line-height: 1;
+}
+.api-card ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.api-card li {
+  font-family: var(--font-mono);
+  font-size: 21px; color: var(--ink2);
+  display: flex; align-items: center; gap: 14px;
+}
+.api-card li::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+  flex-shrink: 0;
+}
+
+
+/* ============================================================
+   SLIDE 6 — LIVE DEMO
+   ============================================================ */
+.slide-demo {
+  background: var(--ink) !important;
+}
+.slide-demo::before { display: none; }
+.slide-demo .sidebar { background: rgba(255,255,255,0.05); }
+.slide-demo .sidebar-dot { background: var(--amber-light); }
+.slide-demo .topbar { background: var(--amber); }
+.slide-demo .slide-num { color: rgba(255,255,255,0.3); }
+
+.slide-demo .demo-content {
+  position: absolute;
+  top: 50%; left: calc(var(--sidebar-w) + 120px);
+  transform: translateY(-50%);
+  z-index: 2;
+}
+.slide-demo .demo-tag {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  color: var(--amber-light);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 32px;
+}
+.slide-demo .demo-title {
+  font-family: var(--font-serif);
+  font-size: 180px;
+  font-style: italic;
+  color: #fff;
+  line-height: 0.85;
+  letter-spacing: -0.03em;
+  margin-bottom: 16px;
+}
+.slide-demo .demo-sub {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 64px;
+}
+.slide-demo .step-list {
+  display: flex; flex-direction: column; gap: 20px;
+}
+.slide-demo .step {
+  display: flex; align-items: center; gap: 36px;
+}
+.slide-demo .step-num {
+  font-family: var(--font-mono);
+  font-size: 18px; font-weight: 600;
+  color: var(--ink);
+  background: var(--amber);
+  padding: 10px 18px;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+.slide-demo .step-text {
+  font-family: var(--font-sans);
+  font-size: 28px; font-weight: 400;
+  color: rgba(255,255,255,0.88);
+}
+
+/* Decorative amber circle */
+.slide-demo .deco-circle {
+  position: absolute;
+  right: 100px; top: 50%;
+  transform: translateY(-50%);
+  width: 520px; height: 520px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(196,131,42,0.25);
+  z-index: 1;
+}
+.slide-demo .deco-circle-2 {
+  position: absolute;
+  right: 160px; top: 50%;
+  transform: translateY(-50%);
+  width: 380px; height: 380px;
+  border-radius: 50%;
+  border: 1px solid rgba(196,131,42,0.15);
+  z-index: 1;
+}
+.slide-demo .deco-label {
+  position: absolute;
+  right: 140px; top: 50%;
+  transform: translate(0, -50%);
+  text-align: center;
+  z-index: 2;
+  width: 360px;
+}
+.slide-demo .deco-label .dl-big {
+  font-family: var(--font-mono);
+  font-size: 120px; font-weight: 600;
+  color: rgba(196,131,42,0.18);
+  line-height: 1;
+}
+.slide-demo .deco-label .dl-text {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  color: rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+
+/* ============================================================
+   SLIDE 7 — ERWEITERUNGEN
+   ============================================================ */
+.slide-ext .ext-grid {
+  position: absolute;
+  top: 248px; left: calc(var(--sidebar-w) + 80px); right: 80px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 20px;
+  bottom: 60px;
+}
+.ext-card {
+  background: var(--white);
+  border: 1px solid var(--amber-border);
+  padding: 32px 36px;
+  display: flex; flex-direction: column;
+}
+.ext-card .ext-num {
+  font-family: var(--font-mono);
+  font-size: 36px; font-weight: 600;
+  color: var(--cream3);
+  margin-bottom: 8px;
+  line-height: 1;
+}
+.ext-card .ext-title {
+  font-family: var(--font-serif);
+  font-size: 36px; color: var(--ink);
+  margin-bottom: 14px; line-height: 1.15;
+}
+.ext-card .ext-desc {
+  font-family: var(--font-sans);
+  font-size: 20px; font-weight: 300;
+  color: var(--muted);
+  line-height: 1.6; flex: 1;
+}
+
+
+/* ============================================================
+   NAVIGATION CONTROLS
+   ============================================================ */
+.deck-controls {
+  position: fixed;
+  bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex; align-items: center; gap: 12px;
+}
+.nav-btn {
+  background: rgba(28,25,21,0.75);
+  color: #fff; border: none;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  font-size: 18px; cursor: pointer;
+  transition: background 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-btn:hover { background: var(--amber); }
+.progress-bar {
+  display: flex; gap: 8px;
+}
+.progress-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  transition: background 0.3s;
+}
+.progress-dot.active { background: var(--amber); }
+
+/* ============================================================
+   INLINE EDIT
+   ============================================================ */
+.edit-hotzone {
+  position: fixed; top: 0; left: 0;
+  width: 80px; height: 80px;
+  z-index: 10000; cursor: pointer;
+}
+.edit-toggle {
+  position: fixed; top: 16px; left: 16px;
+  z-index: 10001;
+  background: var(--amber); color: #fff; border: none;
+  padding: 8px 14px; font-size: 14px; cursor: pointer;
+  border-radius: 4px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+  font-family: var(--font-mono);
+}
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+[contenteditable="true"] { outline: 2px dashed rgba(196,131,42,0.5); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+<!-- ============================================================
+     SLIDE 1 — TITELFOLIE
+     ============================================================ -->
+<section class="slide slide-title active" data-slide="1">
+  <div class="sidebar reveal from-left d1">
+    <div class="sidebar-dot"></div>
+    <div class="sidebar-rule"></div>
+    <div class="sidebar-label">StudyCards</div>
+    <div class="sidebar-rule"></div>
+  </div>
+  <div class="topbar reveal d1"></div>
+
+  <div class="main-content">
+    <div class="eyebrow-tag reveal d2">// Lernkarten-App</div>
+    <div class="big-title reveal d3">Study<em>Cards</em></div>
+    <div class="title-rule reveal d4"></div>
+    <div class="sub-block reveal d5">
+      <div class="sub-stripe"></div>
+      <div class="sub-text">
+        Eine JavaFX-App zum Erstellen<br>und Lernen mit Karteikarten
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-card reveal scale-in d3">
+      <div class="lbl">Frontend</div>
+      <div class="val">JavaFX 21</div>
+    </div>
+    <div class="info-card reveal scale-in d4">
+      <div class="lbl">Datenbank</div>
+      <div class="val">H2 + JDBC</div>
+    </div>
+    <div class="info-card amber-card reveal scale-in d5">
+      <div class="lbl">Präsentation</div>
+      <div class="val">7 Min Vortrag<br>+ 3 Min Q&amp;A</div>
+    </div>
+  </div>
+
+  <div class="footer-bar reveal d6">
+    <div class="footer-rule"></div>
+    <div class="footer-mono">Programmierung II &nbsp;·&nbsp; Semesterprojekt 2024/25</div>
+    <div class="footer-rule"></div>
+    <div class="footer-mono">Version 4 lauffähig</div>
+  </div>
+
+  <div class="slide-num">01 / 07</div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 2 — KURZE ZUSAMMENFASSUNG
+     ============================================================ -->
+<section class="slide slide-summary" data-slide="2">
+  <div class="sidebar">
+    <div class="sidebar-dot"></div>
+    <div class="sidebar-rule"></div>
+    <div class="sidebar-label">StudyCards</div>
+    <div class="sidebar-rule"></div>
+  </div>
+  <div class="topbar"></div>
+
+  <div class="slide-header">
+    <div class="eyebrow reveal d1">Überblick</div>
+    <h2 class="reveal d2">Kurze Zusammenfassung</h2>
+    <p class="sub reveal d3">Was ist StudyCards und wie funktioniert es?</p>
+  </div>
+
+  <div class="cards-row">
+    <div class="sum-card reveal scale-in d3">
+      <div class="sc-icon">01 &mdash; Idee</div>
+      <div class="sc-head">Die Idee</div>
+      <ul>
+        <li>Digitale Lernkarten erstellen</li>
+        <li>In Lernsets organisieren</li>
+        <li>Im Lernmodus üben</li>
+        <li>Ergebnis am Ende sehen</li>
+      </ul>
+    </div>
+    <div class="sum-card reveal scale-in d4">
+      <div class="sc-icon">02 &mdash; Tech</div>
+      <div class="sc-head">Technologien</div>
+      <ul>
+        <li>JavaFX 21 — Benutzeroberfläche</li>
+        <li>H2 Database — Datenspeicher</li>
+        <li>JDBC — Datenbankzugriff</li>
+        <li>Maven — Build &amp; Dependencies</li>
+      </ul>
+    </div>
+    <div class="sum-card reveal scale-in d5">
+      <div class="sc-icon">03 &mdash; Scope</div>
+      <div class="sc-head">Projektumfang</div>
+      <ul>
+        <li>4 Versionen (progressiver Aufbau)</li>
+        <li>7 Java-Klassen</li>
+        <li>MVC-ähnliche Struktur</li>
+        <li>Vollständig lauffähig in V4</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide-num">02 / 07</div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 3 — TECHNISCHE HERAUSFORDERUNGEN
+     ============================================================ -->
+<section class="slide slide-challenges" data-slide="3">
+  <div class="sidebar">
+    <div class="sidebar-dot"></div>
+    <div class="sidebar-rule"></div>
+    <div class="sidebar-label">StudyCards</div>
+    <div class="sidebar-rule"></div>
+  </div>
+  <div class="topbar"></div>
+
+  <div class="slide-header">
+    <div class="eyebrow reveal d1">Technik</div>
+    <h2 class="reveal d2">Technische Herausforderungen</h2>
+    <p class="sub reveal d3">Probleme &amp; wie ich sie gelöst habe</p>
+  </div>
+
+  <div class="cards-grid">
+    <div class="ch-card reveal scale-in d3">
+      <div>
+        <div class="ch-num">Challenge 01</div>
+        <div class="ch-title">JavaFX auf macOS 15</div>
+        <div class="ch-problem">JavaFX 17 lief nicht auf macOS 15 Sequoia — die App startete gar nicht.</div>
+      </div>
+      <div class="ch-solution">Upgrade auf JavaFX 21.0.2 hat das Problem behoben</div>
+    </div>
+    <div class="ch-card reveal scale-in d4">
+      <div>
+        <div class="ch-num">Challenge 02</div>
+        <div class="ch-title">Datenbankverbindung</div>
+        <div class="ch-problem">MySQL lokal einzurichten war fehleranfällig und zeitaufwändig.</div>
+      </div>
+      <div class="ch-solution">H2 Embedded DB — kein separater Server nötig</div>
+    </div>
+    <div class="ch-card reveal scale-in d4">
+      <div>
+        <div class="ch-num">Challenge 03</div>
+        <div class="ch-title">Karte bearbeiten</div>
+        <div class="ch-problem">Die Button-Logik für „Bearbeiten" vs. „Neu hinzufügen" war zunächst unklar.</div>
+      </div>
+      <div class="ch-solution">ID-Flag (bearbeitenId = -1) als Zustandsmarker</div>
+    </div>
+    <div class="ch-card reveal scale-in d5">
+      <div>
+        <div class="ch-num">Challenge 04</div>
+        <div class="ch-title">Dialog-Rückgabewerte</div>
+        <div class="ch-problem">Optional&lt;String&gt; aus showAndWait() war ein unbekanntes Konzept.</div>
+      </div>
+      <div class="ch-solution">isPresent() + get() schrittweise abfragen</div>
+    </div>
+  </div>
+
+  <div class="slide-num">03 / 07</div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 4 — ARCHITEKTUR
+     ============================================================ -->
+<section class="slide slide-arch" data-slide="4">
+  <div class="sidebar">
+    <div class="sidebar-dot"></div>
+    <div class="sidebar-rule"></div>
+    <div class="sidebar-label">StudyCards</div>
+    <div class="sidebar-rule"></div>
+  </div>
+  <div class="topbar"></div>
+
+  <div class="slide-header">
+    <div class="eyebrow reveal d1">Design</div>
+    <h2 class="reveal d2">Architektur</h2>
+    <p class="sub reveal d3">Vereinfachtes MVC-Muster</p>
+  </div>
+
+  <div class="diagram">
+    <div class="arch-layer reveal d3">
+      <div class="arch-bar" style="background:var(--amber)"></div>
+      <div class="arch-block main-block">
+        <span class="arch-label">Main.java</span>
+        <span class="arch-desc">Einstiegspunkt · startet JavaFX Application</span>
+      </div>
+    </div>
+    <div class="arch-arrow reveal d3">↓</div>
+
+    <div class="arch-layer reveal d4">
+      <div class="arch-bar" style="background:var(--amber-light)"></div>
+      <div class="arch-block view-block">
+        <span class="arch-label">Ansichten (View)</span>
+        <span class="arch-desc">HauptFenster · KartenVerwaltung · LernModus</span>
+      </div>
+    </div>
+    <div class="arch-arrow reveal d4">↓</div>
+
+    <div class="arch-layer reveal d5">
+      <div class="arch-bar" style="background:var(--muted)"></div>
+      <div class="arch-block db-block">
+        <span class="arch-label">DatenbankManager</span>
+        <span class="arch-desc">JDBC-Zugriff · alle SQL-Operationen</span>
+      </div>
+    </div>
+    <div class="arch-arrow reveal d5">↓</div>
+
+    <div class="arch-layer reveal d6">
+      <div class="arch-bar" style="background:var(--muted2)"></div>
+      <div class="arch-block model-block">
+        <span class="arch-label">Model</span>
+        <span class="arch-desc">Lernkarte · Lernset (Plain Java Objects)</span>
+      </div>
+    </div>
+
+    <div class="arch-db-row reveal d7">
+      <span class="db-lbl">💾 &nbsp; H2 Datenbank &nbsp;— &nbsp; studycards_db.mv.db (embedded, kein Server)</span>
+    </div>
+  </div>
+
+  <div class="slide-num">04 / 07</div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 5 — JAVAFX APIS
+     ============================================================ -->
+<section class="slide slide-apis" data-slide="5">
+  <div class="sidebar">
+    <div class="sidebar-dot"></div>
+    <div class="sidebar-rule"></div>
+    <div class="sidebar-label">StudyCards</div>
+    <div class="sidebar-rule"></div>
+  </div>
+  <div class="topbar"></div>
+
+  <div class="slide-header">
+    <div class="eyebrow reveal d1">Implementierung</div>
+    <h2 class="reveal d2">Verwendete JavaFX APIs</h2>
+    <p class="sub reveal d3">Klassen und Konzepte im Überblick</p>
+  </div>
+
+  <div class="api-grid">
+    <div class="api-card reveal scale-in d3">
+      <div class="api-head">Steuerelemente</div>
+      <ul>
+        <li>Button</li>
+        <li>Label</li>
+        <li>TextField</li>
+        <li>TextInputDialog</li>
+        <li>Alert</li>
+      </ul>
+    </div>
+    <div class="api-card reveal scale-in d4">
+      <div class="api-head">Layouts</div>
+      <ul>
+        <li>VBox</li>
+        <li>HBox</li>
+        <li>GridPane</li>
+        <li>Insets</li>
+        <li>Pos (Ausrichtung)</li>
+      </ul>
+    </div>
+    <div class="api-card reveal scale-in d5">
+      <div class="api-head">Fenster &amp; Szene</div>
+      <ul>
+        <li>Stage (Fenster)</li>
+        <li>Scene (Inhalt)</li>
+        <li>Application.launch()</li>
+      </ul>
+    </div>
+    <div class="api-card reveal scale-in d6">
+      <div class="api-head">Datenbindung</div>
+      <ul>
+        <li>ObservableList&lt;T&gt;</li>
+        <li>FXCollections</li>
+        <li>ListView.setItems()</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide-num">05 / 07</div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 6 — LIVE DEMO
+     ============================================================ -->
+<section class="slide slide-demo" data-slide="6">
+  <div class="sidebar"></div>
+  <div class="topbar"></div>
+
+  <div class="demo-content">
+    <div class="demo-tag reveal d1">// Live-Demonstration</div>
+    <div class="demo-title reveal d2">Live<br>Demo</div>
+    <div class="demo-sub reveal d3">ca. 2–3 Minuten</div>
+    <div class="step-list">
+      <div class="step reveal d4">
+        <span class="step-num">01</span>
+        <span class="step-text">Lernset erstellen</span>
+      </div>
+      <div class="step reveal d5">
+        <span class="step-num">02</span>
+        <span class="step-text">Karten hinzufügen &amp; bearbeiten</span>
+      </div>
+      <div class="step reveal d6">
+        <span class="step-num">03</span>
+        <span class="step-text">Lernmodus starten &amp; Ergebnis sehen</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="deco-circle reveal d3"></div>
+  <div class="deco-circle-2 reveal d4"></div>
+  <div class="deco-label reveal d5">
+    <div class="dl-big">SC</div>
+    <div class="dl-text">StudyCards v4</div>
+  </div>
+
+  <div class="slide-num" style="color:rgba(255,255,255,0.25);">06 / 07</div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 7 — MÖGLICHE ERWEITERUNGEN
+     ============================================================ -->
+<section class="slide slide-ext" data-slide="7">
+  <div class="sidebar">
+    <div class="sidebar-dot"></div>
+    <div class="sidebar-rule"></div>
+    <div class="sidebar-label">StudyCards</div>
+    <div class="sidebar-rule"></div>
+  </div>
+  <div class="topbar"></div>
+
+  <div class="slide-header">
+    <div class="eyebrow reveal d1">Ausblick</div>
+    <h2 class="reveal d2">Mögliche Erweiterungen</h2>
+    <p class="sub reveal d3">Was man noch einbauen könnte</p>
+  </div>
+
+  <div class="ext-grid">
+    <div class="ext-card reveal scale-in d3">
+      <div class="ext-num">01</div>
+      <div class="ext-title">Spaced Repetition</div>
+      <div class="ext-desc">Karten, die man nicht wusste, öfter und in Abständen wiederholen lassen</div>
+    </div>
+    <div class="ext-card reveal scale-in d4">
+      <div class="ext-num">02</div>
+      <div class="ext-title">Import / Export</div>
+      <div class="ext-desc">Sets als CSV oder JSON exportieren und auf anderen Geräten importieren</div>
+    </div>
+    <div class="ext-card reveal scale-in d4">
+      <div class="ext-num">03</div>
+      <div class="ext-title">Benutzerkonten</div>
+      <div class="ext-desc">Mehrere Nutzer mit eigenem Login und individuellem Lernfortschritt</div>
+    </div>
+    <div class="ext-card reveal scale-in d5">
+      <div class="ext-num">04</div>
+      <div class="ext-title">Statistiken</div>
+      <div class="ext-desc">Lernfortschritt über Zeit als Diagramm visualisieren</div>
+    </div>
+    <div class="ext-card reveal scale-in d5">
+      <div class="ext-num">05</div>
+      <div class="ext-title">Bilder auf Karten</div>
+      <div class="ext-desc">Fotos oder Skizzen zur Frage hinzufügen können</div>
+    </div>
+    <div class="ext-card reveal scale-in d6">
+      <div class="ext-num">06</div>
+      <div class="ext-title">FXML &amp; CSS Design</div>
+      <div class="ext-desc">Moderne Oberfläche mit FXML-Layouts und externen StyleSheets</div>
+    </div>
+  </div>
+
+  <div class="slide-num">07 / 07</div>
+</section>
+
+</main><!-- /.deck-stage -->
+</div><!-- /.deck-viewport -->
+
+
+<!-- NAVIGATION -->
+<div class="deck-controls" id="deckControls">
+  <button class="nav-btn" id="prevBtn" title="Zurück (←)">&#8592;</button>
+  <div class="progress-bar" id="progressBar"></div>
+  <button class="nav-btn" id="nextBtn" title="Weiter (→)">&#8594;</button>
+</div>
+
+<!-- INLINE EDIT -->
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle">✏ Bearbeiten</button>
+
+
+<script>
+/* ============================================================
+   SLIDE PRESENTATION CONTROLLER
+   ============================================================ */
+class SlidePresentation {
+  constructor() {
+    this.slides     = Array.from(document.querySelectorAll('.slide'));
+    this.current    = 0;
+    this.stage      = document.getElementById('deckStage');
+    this.dots       = [];
+    this.touchStartX = 0;
+
+    this.buildProgressDots();
+    this.setupScale();
+    this.setupKeyboard();
+    this.setupTouch();
+    this.setupWheel();
+    this.setupButtons();
+    this.show(0);
+  }
+
+  buildProgressDots() {
+    const bar = document.getElementById('progressBar');
+    this.slides.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'progress-dot';
+      d.addEventListener('click', () => this.show(i));
+      bar.appendChild(d);
+      this.dots.push(d);
+    });
+  }
+
+  setupScale() {
+    const scale = () => {
+      const f = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+      const x = (window.innerWidth  - 1920 * f) / 2;
+      const y = (window.innerHeight - 1080 * f) / 2;
+      this.stage.style.transform = `translate(${x}px,${y}px) scale(${f})`;
+    };
+    scale();
+    window.addEventListener('resize', scale);
+  }
+
+  setupKeyboard() {
+    document.addEventListener('keydown', e => {
+      if (e.target.getAttribute('contenteditable')) return;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault(); this.next();
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault(); this.prev();
+      } else if (e.key === 'Home') { this.show(0); }
+      else if (e.key === 'End')  { this.show(this.slides.length - 1); }
+      else if (e.key === 'e' || e.key === 'E') { editor.toggleEditMode(); }
+    });
+  }
+
+  setupTouch() {
+    this.stage.addEventListener('touchstart', e => {
+      this.touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    this.stage.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - this.touchStartX;
+      if (Math.abs(dx) > 50) { dx < 0 ? this.next() : this.prev(); }
+    });
+  }
+
+  setupWheel() {
+    let cooldown = false;
+    document.addEventListener('wheel', e => {
+      if (cooldown) return;
+      cooldown = true;
+      setTimeout(() => cooldown = false, 700);
+      e.deltaY > 0 ? this.next() : this.prev();
+    }, { passive: true });
+  }
+
+  setupButtons() {
+    document.getElementById('prevBtn').addEventListener('click', () => this.prev());
+    document.getElementById('nextBtn').addEventListener('click', () => this.next());
+  }
+
+  show(index) {
+    this.current = Math.max(0, Math.min(index, this.slides.length - 1));
+    this.slides.forEach((s, i) => {
+      const active = i === this.current;
+      s.classList.toggle('active',  active);
+      // slight delay so entrance animations trigger after visibility
+      if (active) {
+        requestAnimationFrame(() => requestAnimationFrame(() => s.classList.add('visible')));
+      } else {
+        s.classList.remove('visible');
+      }
+    });
+    this.dots.forEach((d, i) => d.classList.toggle('active', i === this.current));
+  }
+
+  next() { this.show(this.current + 1); }
+  prev() { this.show(this.current - 1); }
+}
+
+/* ============================================================
+   INLINE EDITOR
+   ============================================================ */
+class InlineEditor {
+  constructor() {
+    this.isActive = false;
+    this.toggle   = document.getElementById('editToggle');
+    this.hotzone  = document.getElementById('editHotzone');
+    this.hideTimeout = null;
+    this.editables = [];
+    this.setupHover();
+    this.loadSaved();
+  }
+
+  setupHover() {
+    const show = () => { clearTimeout(this.hideTimeout); this.toggle.classList.add('show'); };
+    const hide = () => {
+      this.hideTimeout = setTimeout(() => {
+        if (!this.isActive) this.toggle.classList.remove('show');
+      }, 400);
+    };
+    this.hotzone.addEventListener('mouseenter', show);
+    this.hotzone.addEventListener('mouseleave', hide);
+    this.toggle.addEventListener('mouseenter', show);
+    this.toggle.addEventListener('mouseleave', hide);
+    this.hotzone.addEventListener('click', () => this.toggleEditMode());
+    this.toggle.addEventListener('click',   () => this.toggleEditMode());
+  }
+
+  toggleEditMode() {
+    this.isActive = !this.isActive;
+    this.toggle.classList.toggle('active', this.isActive);
+    this.toggle.textContent = this.isActive ? '💾 Speichern (Ctrl+S)' : '✏ Bearbeiten';
+
+    const targets = document.querySelectorAll(
+      '.slide h2, .slide .big-title, .slide .sub-text, .slide .sub, ' +
+      '.slide .sc-head, .slide li, .slide .ch-title, .slide .ch-problem, ' +
+      '.slide .ch-solution, .slide .ext-title, .slide .ext-desc, ' +
+      '.slide .arch-label, .slide .arch-desc, .slide .api-head, ' +
+      '.slide .step-text, .slide .demo-title, .slide .demo-sub'
+    );
+    targets.forEach(el => {
+      el.setAttribute('contenteditable', this.isActive ? 'true' : 'false');
+    });
+
+    if (!this.isActive) this.save();
+  }
+
+  save() {
+    const data = {};
+    document.querySelectorAll('[contenteditable]').forEach((el, i) => {
+      data[i] = el.innerHTML;
+    });
+    localStorage.setItem('studycards-edits', JSON.stringify(data));
+  }
+
+  loadSaved() {
+    const saved = localStorage.getItem('studycards-edits');
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    document.querySelectorAll('[contenteditable]').forEach((el, i) => {
+      if (data[i] !== undefined) el.innerHTML = data[i];
+    });
+  }
+}
+
+/* Boot */
+const pres   = new SlidePresentation();
+const editor = new InlineEditor();
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault(); editor.save();
+    const t = document.getElementById('editToggle');
+    const orig = t.textContent;
+    t.textContent = '✓ Gespeichert';
+    setTimeout(() => { t.textContent = orig; }, 1500);
+  }
+});
+</script>
+
+</body>
+</html>
