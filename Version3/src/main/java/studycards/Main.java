@@ -1,51 +1,52 @@
 package studycards;
 
-// ============================================================
-// ============================================================
+// das hier ist mein hauptprogramm, hier startet alles
 
-import javafx.application.Application;          // Richtig: Application (nicht Applikation)
-import javafx.stage.Stage;                      // Das Fenster von JavaFX
-import studycards.datenbank.DatenbankManager;  // Unsere Datenbank-Klasse
-import studycards.ansichten.HauptFenster;      // Das Hauptfenster
+import javafx.application.Application; // das muss man importieren damit javafx funktioniert
+import javafx.stage.Stage;             // das ist das fenster
+import studycards.datenbank.DatenbankManager; // meine klasse die die datenbank macht
+import studycards.ansichten.HauptFenster;     // das erste fenster das der nutzer sieht
 
 /**
- * Die Hauptklasse des Programms.
- * Sie erbt von Application - das ist bei JavaFX Pflicht.
+ * Das ist die Hauptklasse von StudyCards.
+ * Man muss Application erweitern damit JavaFX funktioniert.
  */
-public class Main extends Application { // Jetzt richtig: Application
+public class Main extends Application {
 
-    // Der Datenbank-Manager wird hier gespeichert
+    // den datenbankmanager speichere ich hier damit alle anderen klassen ihn benutzen können
     private static DatenbankManager datenbankManager;
 
     /**
-     * Die start()-Methode wird von JavaFX automatisch aufgerufen.
-     * @param primaryStage Das Fenster das JavaFX uns gibt
+     * Diese Methode wird automatisch aufgerufen wenn das Programm startet.
+     * @param primaryStage das ist das hauptfenster das javafx uns automatisch gibt
      */
     @Override
     public void start(Stage primaryStage) {
-        // Zuerst die Datenbank verbinden
-        datenbankManager = new DatenbankManager();  // Neues Objekt erstellen
-        datenbankManager.verbinden();               // Verbindung herstellen
-        datenbankManager.tabellenErstellen();       // Tabellen anlegen
 
-        // Das Hauptfenster erstellen und anzeigen
+        // zuerst die datenbank starten, ohne datenbank läuft gar nichts
+        datenbankManager = new DatenbankManager(); // neues objekt erstellen
+        datenbankManager.verbinden();              // verbindung zur datenbank aufbauen
+        datenbankManager.tabellenErstellen();      // tabellen erstellen wenn sie noch nicht da sind
+
+        // jetzt das erste fenster erstellen und anzeigen
         HauptFenster hauptFenster = new HauptFenster(primaryStage, datenbankManager);
-        hauptFenster.zeige(); // Fenster anzeigen
+        hauptFenster.zeige(); // fenster anzeigen
     }
 
     /**
-     * Gibt den DatenbankManager zurück damit andere Klassen ihn nutzen können.
-     * @return Der DatenbankManager
+     * Gibt den DatenbankManager zurück.
+     * Habe ich als static gemacht damit ich ihn von überall aufrufen kann.
+     * @return der datenbankmanager
      */
     public static DatenbankManager getDatenbankManager() {
-        return datenbankManager; // Manager zurückgeben
+        return datenbankManager; // zurückgeben
     }
 
     /**
      * Hier fängt das Programm an.
-     * @param args Programmargumente (brauchen wir nicht)
+     * @param args die brauche ich nicht
      */
     public static void main(String[] args) {
-        launch(args); // JavaFX starten
+        launch(args); // javafx starten
     }
 }

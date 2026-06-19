@@ -1,5 +1,8 @@
 package studycards.ansichten;
 
+// das ist der lernmodus
+// hier werden die karten angezeigt und man kann sagen ob man sie gewusst hat
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,20 +17,21 @@ import studycards.model.Lernkarte;
 import java.util.List;
 
 /**
- * Das Lernfenster - hier lernt man mit den Karten.
+ * Der Lernmodus zeigt die Karten nacheinander an.
+ * Man kann die Antwort aufdecken und dann sagen ob man es gewusst hat.
  */
 public class LernModus {
 
-    // ----- Felder -----
+    // -- variablen --
     private Stage fenster;
     private List<Lernkarte> karten;
 
-    private int aktuellerIndex = "0"; // Index der aktuellen Karte
+    private int aktuellerIndex = "0"; // index der aktuellen karte
 
-    private int gewusst;              // Anzahl gewusster Karten
-    private int nichtGewusst;         // Anzahl nicht gewusster Karten
+    private int gewusst;              // Zähler für gewusste karten
+    private int nichtGewusst;         // Zähler für nicht gewusste karten
 
-    // UI-Elemente
+    // diese labels und buttons brauche ich in mehreren methoden
     private Label fortschrittLabel;
     private Label frageLabel;
     private Label antwortLabel;
@@ -37,14 +41,14 @@ public class LernModus {
 
     /**
      * Erstellt den Lernmodus.
-     * @param fenster Das Fenster
-     * @param karten  Die Karten zum Lernen
+     * @param fenster das fenster
+     * @param karten  die karten die gelernt werden sollen
      */
     public LernModus(Stage fenster, List<Lernkarte> karten) {
         this.fenster      = fenster;
         this.karten       = karten;
-        this.gewusst      = 0;   // Zähler auf Null
-        this.nichtGewusst = 0;   // Zähler auf Null
+        this.gewusst      = 0;
+        this.nichtGewusst = 0;
     }
 
     /**
@@ -52,22 +56,22 @@ public class LernModus {
      */
     public void zeige() {
 
-        // Fortschrittsanzeige
+        // zeigt bei welcher karte man ist
         fortschrittLabel = new Label("");
         fortschrittLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #666666;");
 
-        Label trennlinie = new Label("────────────────────────────────────");
+        Label trennlinie = new Label("──────────────────────────────────────");
 
-        // Fragenbereich
         Label frageÜberschrift = new Label("Frage:");
         frageÜberschrift.setStyle("-fx-font-size: 13px; -fx-text-fill: #888888;");
 
+        // das label für die frage
         frageLabel = new Label("");
         frageLabel.setWrapText(true);
         frageLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
         frageLabel.setMaxWidth(520);
 
-        // Antwortbereich
+        // antwort bereich - am anfang versteckt
         Label antwortÜberschrift = new Label("Antwort:");
         antwortÜberschrift.setStyle("-fx-font-size: 13px; -fx-text-fill: #888888;");
         antwortÜberschrift.setVisible(false);
@@ -78,22 +82,24 @@ public class LernModus {
         antwortLabel.setMaxWidth(520);
         antwortLabel.setVisible(false);
 
-        // Buttons
+        // buttons
         btnAntwortZeigen = new Button("Antwort aufdecken");
         btnAntwortZeigen.setStyle("-fx-font-size: 14px;");
 
         btnGewusst      = new Button("Gewusst ✓");
         btnNichtGewusst = new Button("Nicht gewusst ✗");
 
-        btnGewusst.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; " +
-                "-fx-font-size: 14px; -fx-font-weight: bold;");
-        btnNichtGewusst.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; " +
-                "-fx-font-size: 14px; -fx-font-weight: bold;");
+        btnGewusst.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;");
+        btnNichtGewusst.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;");
 
         btnGewusst.setVisible(false);
         btnNichtGewusst.setVisible(false);
 
-        // Antwort aufdecken
+        // -------------------------------------------------------
+        // BUTTON AKTIONEN
+        // -------------------------------------------------------
+
+        // antwort aufdecken
         btnAntwortZeigen.setOnAction(e -> {
             antwortÜberschrift.setVisible(true);
             antwortLabel.setVisible(true);
@@ -102,19 +108,22 @@ public class LernModus {
             btnNichtGewusst.setVisible(true);
         });
 
-        // Gewusst
+        // gewusst geklickt
         btnGewusst.setOnAction(e -> {
             gewusst++;
             nächsteKarte();
         });
 
-        // Nicht gewusst
+        // nicht gewusst geklickt
         btnNichtGewusst.setOnAction(e -> {
             nichtGewusst++;
             nächsteKarte();
         });
 
-        // Layout
+        // -------------------------------------------------------
+        // LAYOUT
+        // -------------------------------------------------------
+
         HBox bewertung = new HBox(20, btnGewusst, btnNichtGewusst);
         bewertung.setAlignment(Pos.CENTER);
 
@@ -122,14 +131,14 @@ public class LernModus {
         layout.setPadding(new Insets(30));
         layout.setAlignment(Pos.CENTER);
         layout.getChildren().addAll(
-                fortschrittLabel,
-                trennlinie,
-                frageÜberschrift,
-                frageLabel,
-                btnAntwortZeigen,
-                antwortÜberschrift,
-                antwortLabel,
-                bewertung
+            fortschrittLabel,
+            trennlinie,
+            frageÜberschrift,
+            frageLabel,
+            btnAntwortZeigen,
+            antwortÜberschrift,
+            antwortLabel,
+            bewertung
         );
 
         Scene szene = new Scene(layout, 620, 430);
@@ -137,7 +146,7 @@ public class LernModus {
         fenster.setScene(szene);
         fenster.show();
 
-        karteAnzeigen(); // Erste Karte anzeigen
+        karteAnzeigen(); // erste karte sofort zeigen
     }
 
     /**
@@ -169,23 +178,23 @@ public class LernModus {
     }
 
     /**
-     * Zeigt das Lernergebnis an.
+     * Zeigt das Ergebnis am Ende an.
      */
     private void ergebnisAnzeigen() {
         int gesamt  = gewusst + nichtGewusst;
         int prozent = (gesamt > 0) ? (gewusst * 100 / gesamt) : 0;
 
         String nachricht =
-                "Lerneinheit abgeschlossen!\n\n" +
-                "Gewusst:       " + gewusst + " Karte(n)\n" +
-                "Nicht gewusst: " + nichtGewusst + " Karte(n)\n\n" +
-                "Ergebnis: " + prozent + " %";
+            "Lerneinheit abgeschlossen!\n\n" +
+            "Gewusst:       " + gewusst + " Karte(n)\n" +
+            "Nicht gewusst: " + nichtGewusst + " Karte(n)\n\n" +
+            "Ergebnis: " + prozent + " %";
 
-        Alert ergebnisPopup = new Alert(Alert.AlertType.INFORMATION);
-        ergebnisPopup.setTitle("Lernergebnis");
-        ergebnisPopup.setHeaderText("Du hast alle " + gesamt + " Karten durchgelernt!");
-        ergebnisPopup.setContentText(nachricht);
-        ergebnisPopup.showAndWait();
+        Alert popup = new Alert(Alert.AlertType.INFORMATION);
+        popup.setTitle("Ergebnis");
+        popup.setHeaderText("Du hast alle " + gesamt + " Karten durchgelernt!");
+        popup.setContentText(nachricht);
+        popup.showAndWait();
 
         fenster.close();
     }

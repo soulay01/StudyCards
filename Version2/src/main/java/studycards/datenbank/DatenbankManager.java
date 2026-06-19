@@ -1,53 +1,56 @@
 package studycards.datenbank;
 
-import java.sql.Connection;           // Datenbankverbindung
-import java.sql.DriverManager;        // Hilfsklasse für die Verbindung
-import java.sql.PreparedStatement;    // Für sichere SQL-Anfragen
-import java.sql.ResultSet;            // Für die Ergebnisse aus der DB
-import java.sql.Statement;            // Für normale SQL-Anfragen
-import java.util.ArrayList;           // Für die Listen
-import java.util.List;                // Das Listen-Interface
-import studycards.model.Lernkarte;   // Unsere Lernkarten-Klasse
-import studycards.model.Lernset;     // Unsere Lernset-Klasse
+// das hier ist die klasse die alles mit der datenbank macht
+
+import java.sql.Connection;        // das braucht man für die datenbankverbindung
+import java.sql.DriverManager;     // damit kann man sich verbinden
+import java.sql.PreparedStatement; // das ist für sql befehle mit variablen
+import java.sql.ResultSet;         // das sind die ergebnisse aus der datenbank
+import java.sql.Statement;         // das ist für einfache sql befehle
+import java.util.ArrayList;        // für die listen
+import java.util.List;             // das listen-interface
+import studycards.model.Lernkarte; // meine lernkarten klasse
+import studycards.model.Lernset;   // meine lernset klasse
 
 /**
- * Der DatenbankManager kuemmert sich um alles was mit MySQL zu tun hat.
- * Er verbindet sich mit der Datenbank und führt CRUD-Operationen aus.
+ * Diese Klasse macht alles was mit der Datenbank zu tun hat.
+ * Hier kann man Lernsets und Karten speichern, laden, aendern und löschen.
  */
 public class DatenbankManager {
 
-    // ----- Verbindungsdaten für MySQL -----
+    // -- verbindungsdaten für mysql --
     private static final String URL      = "jdbc:mysql://localhost:3306/studycards";
-    private static final String BENUTZER = "root"; // MySQL-Benutzername
-    private static final String PASSWORT = "";      // MySQL-Passwort
+    private static final String BENUTZER = "root"; // mysql benutzername
+    private static final String PASSWORT = "";      // kein passwort
 
-    // Die Datenbankverbindung
-    private Connection verbindung; // Jetzt richtig: Connection
+    // die verbindung zur datenbank speichere ich hier
+    private Connection verbindung;
 
-    // ============================================================
+    // -------------------------------------------------------
     // VERBINDUNG
-    // ============================================================
+    // -------------------------------------------------------
 
     /**
-     * Stellt die Verbindung zur MySQL-Datenbank her.
+     * Baut die Verbindung zur Datenbank auf.
+     * Muss als erstes aufgerufen werden bevor man irgendwas anderes macht.
      */
     public void verbinden() {
         try {
             verbindung = DriverManager.getConnection(URL, BENUTZER, PASSWORT);
-            System.out.println("Datenbank erfolgreich verbunden!");
+            System.out.println("Datenbank verbunden!");
         } catch (Exception fehler) {
-            System.out.println("Fehler beim Verbinden: " + fehler.getMessage());
+            System.out.println("Fehler bei der Verbindung: " + fehler.getMessage());
         }
     }
 
     /**
-     * Erstellt die Datenbanktabellen wenn sie noch nicht existieren.
+     * Erstellt die zwei Tabellen die das Programm braucht.
+     * Wenn die Tabellen schon da sind passiert nichts.
      */
     public void tabellenErstellen() {
         try {
-            Statement stmt = verbindung.createStatement(); // Statement erstellen
+            Statement stmt = verbindung.createStatement();
 
-            // Tabelle für Lernsets
             String sqlSets =
                 "CREATE TABLE IF NOT EXISTS lernsets (" +
                 "id INT AUTO_INCREMENT PRIMARY KEY, " +
@@ -55,7 +58,6 @@ public class DatenbankManager {
                 ")";
             stmt.execute(sqlSets);
 
-            // Tabelle für Lernkarten
             String sqlKarten =
                 "CREATE TABLE IF NOT EXISTS lernkarten (" +
                 "id INT AUTO_INCREMENT PRIMARY KEY, " +
@@ -66,37 +68,36 @@ public class DatenbankManager {
                 ")";
             stmt.execute(sqlKarten);
 
-            System.out.println("Tabellen sind bereit!");
+            System.out.println("Tabellen sind fertig!");
         } catch (Exception fehler) {
             System.out.println("Fehler beim Erstellen der Tabellen: " + fehler.getMessage());
         }
     }
 
-    // ============================================================
+    // -------------------------------------------------------
     // LERNSET OPERATIONEN
-    // ============================================================
+    // -------------------------------------------------------
 
     /**
-     * Lädt alle Lernsets aus der Datenbank.
-     * @return Eine Liste mit allen Lernsets
+     * Lädt alle Lernsets aus der Datenbank und gibt sie als Liste zurück.
+     * @return eine liste mit allen lernsets
      */
     public List<Lernset> alleLernseteLaden() {
-        List<Lernset> liste = new ArrayList<>(); // Leere Liste vorbereiten
+        List<Lernset> liste = new ArrayList<>();
 
         try {
             String sql = "SELECT id, name FROM lernsets ORDER BY name";
-            Statement stmt = verbindung.createStatement(); // Statement erstellen
+            Statement stmt = verbindung.createStatement();
 
-            ResultSet ergebnis = stmt.executeUpdate(sql); // Anfrage ausführen
+            ResultSet ergebnis = stmt.executeUpdate(sql); // alle lernsets laden
 
             while (ergebnis.next()) {
                 int id      = ergebnis.getInt("id");
                 String name = ergebnis.getString("name");
-                Lernset neuesSet = new Lernset(id, name);
-                liste.add(neuesSet);
+                liste.add(new Lernset(id, name));
             }
         } catch (Exception fehler) {
-            System.out.println("Fehler beim Laden der Lernsets: " + fehler.getMessage());
+            System.out.println("Fehler beim Laden: " + fehler.getMessage());
         }
 
         return liste;
@@ -104,7 +105,7 @@ public class DatenbankManager {
 
     /**
      * Speichert ein neues Lernset in der Datenbank.
-     * @param name Der Name des neuen Lernsets
+     * @param name der name des neuen lernsets
      */
     public void lernsetSpeichern(String name) {
         try {
@@ -118,8 +119,8 @@ public class DatenbankManager {
     }
 
     /**
-     * Löscht ein Lernset aus der Datenbank.
-     * @param id Die ID des Sets
+     * Loescht ein Lernset aus der Datenbank.
+     * @param id die id des lernsets
      */
     public void lernsetLöschen(int id) {
         try {
@@ -128,14 +129,14 @@ public class DatenbankManager {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (Exception fehler) {
-            System.out.println("Fehler beim Löschen: " + fehler.getMessage());
+            System.out.println("Fehler beim Loeschen: " + fehler.getMessage());
         }
     }
 
     /**
      * Ändert den Namen eines Lernsets.
-     * @param id        Die ID des Sets
-     * @param neuerName Der neue Name
+     * @param id        die id des lernsets
+     * @param neuerName der neue name
      */
     public void lernsetAktualisieren(int id, String neuerName) {
         try {
@@ -145,18 +146,18 @@ public class DatenbankManager {
             ps.setInt(2, id);
             ps.executeUpdate();
         } catch (Exception fehler) {
-            System.out.println("Fehler beim Aktualisieren: " + fehler.getMessage());
+            System.out.println("Fehler beim Umbenennen: " + fehler.getMessage());
         }
     }
 
-    // ============================================================
+    // -------------------------------------------------------
     // LERNKARTEN OPERATIONEN
-    // ============================================================
+    // -------------------------------------------------------
 
     /**
-     * Lädt alle Karten die zu einem Lernset gehören.
-     * @param lernsetId Die ID des Lernsets
-     * @return Liste mit den Lernkarten
+     * Lädt alle Karten die zu einem bestimmten Lernset gehoeren.
+     * @param lernsetId die id des lernsets
+     * @return liste mit den karten des sets
      */
     public List<Lernkarte> kartenLadenFürSet(int lernsetId) {
         List<Lernkarte> liste = new ArrayList<>();
@@ -172,8 +173,7 @@ public class DatenbankManager {
                 String frage   = ergebnis.getString("frage");
                 String antwort = ergebnis.getString("antwort");
                 int setId      = ergebnis.getInt("lernset_id");
-                Lernkarte karte = new Lernkarte(id, frage, antwort, setId);
-                liste.add(karte);
+                liste.add(new Lernkarte(id, frage, antwort, setId));
             }
         } catch (Exception fehler) {
             System.out.println("Fehler beim Laden der Karten: " + fehler.getMessage());
@@ -183,10 +183,10 @@ public class DatenbankManager {
     }
 
     /**
-     * Speichert eine neue Lernkarte.
-     * @param frage     Die Frage
-     * @param antwort   Die Antwort
-     * @param lernsetId Die Set-ID
+     * Speichert eine neue Lernkarte in der Datenbank.
+     * @param frage     die frage
+     * @param antwort   die antwort
+     * @param lernsetId die id des lernsets
      */
     public void karteSpeichern(String frage, String antwort, int lernsetId) {
         try {
@@ -202,8 +202,8 @@ public class DatenbankManager {
     }
 
     /**
-     * Löscht eine Lernkarte.
-     * @param id Die ID der Karte
+     * Loescht eine Lernkarte.
+     * @param id die id der karte
      */
     public void karteLöschen(int id) {
         try {
@@ -212,15 +212,15 @@ public class DatenbankManager {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (Exception fehler) {
-            System.out.println("Fehler beim Löschen der Karte: " + fehler.getMessage());
+            System.out.println("Fehler beim Loeschen der Karte: " + fehler.getMessage());
         }
     }
 
     /**
-     * Ändert Frage und Antwort einer Karte.
-     * @param id          Die Karten-ID
-     * @param neueFrage   Neue Frage
-     * @param neueAntwort Neue Antwort
+     * Ändert die Frage und Antwort einer Lernkarte.
+     * @param id          die id der karte
+     * @param neueFrage   die neue frage
+     * @param neueAntwort die neue antwort
      */
     public void karteAktualisieren(int id, String neueFrage, String neueAntwort) {
         try {

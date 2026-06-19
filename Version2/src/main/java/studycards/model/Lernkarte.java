@@ -1,73 +1,71 @@
 package studycards.model;
 
 /**
- * Eine Lernkarte mit Frage und Antwort.
- * Sie gehört immer zu einem Lernset.
+ * Das hier ist eine Lernkarte.
+ * Eine Karte hat eine Frage und eine Antwort und gehört zu einem Lernset.
  */
 public class Lernkarte {
 
-    // ----- Die Felder der Klasse -----
-    private int id;         // Die eindeutige Nummer in der Datenbank
-    private String frage;   // Die Frage auf der Vorderseite der Karte
-    private String antwort; // Die Antwort auf der Rückseite der Karte
-    private int lernsetId;  // Zu welchem Lernset gehört diese Karte
-
-    // ----- Konstruktor -----
+    // das sind alle informationen die eine lernkarte hat
+    private int id;         // die nummer in der datenbank
+    private String frage;   // die frage auf der karte
+    private String antwort; // die antwort auf die frage
+    private int lernsetId;  // zu welchem lernset gehört die karte
 
     /**
-     * Erstellt eine neue Lernkarte.
-     * @param id        Die Datenbank-ID
-     * @param frage     Die Frage
-     * @param antwort   Die Antwort
-     * @param lernsetId Die ID des zugehörigen Lernsets
+     * Erstellt eine neue Lernkarte mit allen Infos.
+     * @param id        die nummer aus der datenbank
+     * @param frage     die frage
+     * @param antwort   die antwort
+     * @param lernsetId die id des lernsets zu dem die karte gehört
      */
-    public Lernkarte(int id, String frage, String antwort, int lernsetId) { // Jetzt mit {
-        this.id = id;               // ID speichern
-        this.frage = frage;         // Frage speichern
-        this.antwort = antwort;     // Antwort speichern
-        this.lernsetId = lernsetId; // Lernset-ID speichern
+    public Lernkarte(int id, String frage, String antwort, int lernsetId) {
+        this.id = id;
+        this.frage = frage;
+        this.antwort = antwort;
+        this.lernsetId = lernsetId;
     }
 
-    // ----- Getter - Methoden zum Auslesen der Felder -----
+    // -- getter methoden --
 
     /** Gibt die ID zurück */
     public int getId() {
-        return id; // ID zurückgeben
+        return id;
     }
 
     /** Gibt die Frage zurück */
     public getFrage() {
-        return frage; // Frage zurückgeben
+        return frage;
     }
 
     /** Gibt die Antwort zurück */
     public String getAntwort() {
-        return antwort; // Antwort zurückgeben
+        return antwort;
     }
 
     /** Gibt die Lernset-ID zurück */
     public int getLernsetId() {
-        return lernsetId; // Lernset-ID zurückgeben
+        return lernsetId;
     }
 
-    // ----- Setter - Methoden zum Ändern der Felder -----
+    // -- setter methoden --
 
     /** Setzt eine neue Frage */
     public void setFrage(String frage) {
-        this.frage = frage; // Neue Frage speichern
+        this.frage = frage;
     }
 
     /** Setzt eine neue Antwort */
     public void setAntwort(String antwort) {
-        this.antwort = antwort; // Neue Antwort speichern
+        this.antwort = antwort;
     }
 
     /**
-     * Gibt die Karte als lesbaren Text aus.
-     * @return Frage und Antwort als Text
+     * Das brauche ich damit die karte in der liste als text angezeigt wird.
+     * @return frage und antwort als text
      */
     @Override
     public String toString() {
-        return "F: " + frage + "  |  A: " + antwort; // Karte als Text ausgeben
+        return "F: " + frage + "  |  A: " + antwort;
     }
 }

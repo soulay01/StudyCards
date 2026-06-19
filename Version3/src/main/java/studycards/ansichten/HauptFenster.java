@@ -1,7 +1,10 @@
 package studycards.ansichten;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+// das hauptfenster zeigt alle lernsets an
+// von hier aus kann man sets erstellen, löschen, umbenennen und den lernmodus starten
+
+import javafx.collections.FXCollections;  // hilfsmethoden für javafx listen
+import javafx.collections.ObservableList; // eine liste die automatisch die ansicht aktualisiert
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -21,11 +24,11 @@ import java.util.List;
 
 /**
  * Das Hauptfenster der Anwendung.
- * Zeigt alle Lernsets und ermöglicht deren Verwaltung.
+ * Hier sieht man alle Lernsets und kann sie verwalten.
  */
 public class HauptFenster {
 
-    // ----- Felder -----
+    // -- variablen für das fenster und die daten --
     private Stage fenster;
     private DatenbankManager datenbank;
     private ListView<Lernset> setsListe;
@@ -33,8 +36,8 @@ public class HauptFenster {
 
     /**
      * Erstellt das Hauptfenster.
-     * @param fenster   Das Stage-Objekt
-     * @param datenbank Der Datenbankmanager
+     * @param fenster   das stage objekt von javafx
+     * @param datenbank der datenbankmanager
      */
     public HauptFenster(Stage fenster, DatenbankManager datenbank) {
         this.fenster   = fenster;
@@ -50,29 +53,33 @@ public class HauptFenster {
         Label überschrift = new Label("Meine Lernsets");
         überschrift.setStyle("-fx-font-size: 22px; -fx-font-weight: bold;");
 
-        // Liste der Lernsets
+        // liste mit allen lernsets
         setsListe = new ListView<>();
 
-        setsDaten = new ObservableList<>(); // Datencontainer erstellen
+        setsDaten = new ObservableList<>(); // datencontainer erstellen
 
         setsListe.setItems(setsDaten);
         setsListe.setPrefHeight(300);
         setsListeAktualisieren();
 
-        // Buttons
+        // -- alle buttons erstellen --
         Button btnNeuesSet   = new Button("+ Neues Set");
-        Button btnLöschen   = new Button("Set löschen");
+        Button btnLöschen    = new Button("Set löschen");
         Button btnUmbenennen = new Button("Umbenennen");
         Button btnKarten     = new Button("Karten verwalten");
         Button btnLernmodus  = new Button("Lernmodus starten");
 
         btnLernmodus.setStyle("-fx-background-color: #3a7dc9; -fx-text-fill: white; -fx-font-weight: bold;");
 
-        // Neues Lernset erstellen
+        // -------------------------------------------------------
+        // BUTTON AKTIONEN
+        // -------------------------------------------------------
+
+        // neues lernset erstellen
         btnNeuesSet.setOnAction(e -> {
             TextInputDialog dialog = new TextInputDialog();
-            dialog.setTitle("Neues Lernset erstellen");
-            dialog.setHeaderText("Wie soll das neue Lernset heissen?");
+            dialog.setTitle("Neues Lernset");
+            dialog.setHeaderText("Wie soll das Lernset heissen?");
             dialog.setContentText("Name:");
             dialog.showAndWait().ifPresent(eingabe -> {
                 if (!eingabe.trim().isEmpty()) {
@@ -82,13 +89,13 @@ public class HauptFenster {
             });
         });
 
-        // Löschen
+        // lernset löschen
         btnLöschen.setOnAction(e -> {
             Lernset ausgewählt = setsListe.getSelectionModel().getSelectedItem();
             if (ausgewählt != null) {
                 Alert bestätigung = new Alert(Alert.AlertType.CONFIRMATION);
                 bestätigung.setTitle("Löschen bestätigen");
-                bestätigung.setContentText("Wirklich löschen?");
+                bestätigung.setContentText("Das Set und alle Karten werden gelöscht!");
                 bestätigung.showAndWait().ifPresent(antwort -> {
                     if (antwort == ButtonType.OK) {
                         datenbank.lernsetLöschen(ausgewählt.getId());
@@ -100,7 +107,7 @@ public class HauptFenster {
             }
         });
 
-        // Umbenennen
+        // lernset umbenennen
         btnUmbenennen.setOnAction(e -> {
             Lernset ausgewählt = setsListe.getSelectionModel().getSelectedItem();
             if (ausgewählt != null) {
@@ -118,7 +125,7 @@ public class HauptFenster {
             }
         });
 
-        // Karten verwalten
+        // karten verwalten
         btnKarten.setOnAction(e -> {
             Lernset ausgewählt = setsListe.getSelectionModel().getSelectedItem();
             if (ausgewählt != null) {
@@ -130,7 +137,7 @@ public class HauptFenster {
             }
         });
 
-        // Lernmodus starten
+        // lernmodus starten
         btnLernmodus.setOnAction(e -> {
             Lernset ausgewählt = setsListe.getSelectionModel().getSelectedItem();
             if (ausgewählt != null) {
@@ -147,7 +154,10 @@ public class HauptFenster {
             }
         });
 
-        // Layout
+        // -------------------------------------------------------
+        // LAYOUT ZUSAMMENBAUEN
+        // -------------------------------------------------------
+
         HBox buttonLeiste = new HBox(8);
         buttonLeiste.getChildren().addAll(btnNeuesSet, btnLöschen, btnUmbenennen, btnKarten, btnLernmodus);
 
@@ -156,13 +166,13 @@ public class HauptFenster {
         layout.getChildren().addAll(überschrift, setsListe, buttonLeiste);
 
         Scene szene = new Scene(layout, 720, 480);
-        fenster.setTitle("StudyCards - Lernset-Übersicht");
+        fenster.setTitle("StudyCards - Übersicht");
         fenster.setScene(szene);
         fenster.show();
     }
 
     /**
-     * Aktualisiert die Lernset-Liste aus der Datenbank.
+     * Lädt alle Lernsets neu aus der Datenbank und aktualisiert die Liste.
      */
     private void setsListeAktualisieren() {
         setsDaten.clear();

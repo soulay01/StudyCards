@@ -1,52 +1,53 @@
 package studycards.ansichten;
 
-// ============================================================
-// Dieses Fenster zeigt alle Karten eines Lernsets.
-// Man kann Karten hinzufügen, löschen und bearbeiten.
-// ============================================================
+// in diesem fenster kann man karten zu einem lernset hinzufügen, bearbeiten und löschen
 
-import javafx.collections.FXCollections;         // Für JavaFX Listen
-import javafx.collections.ObservableList;        // Beobachtbare Liste
-import javafx.geometry.Insets;                   // Für Ränder
-import javafx.scene.Scene;                       // Die Szene
-import javafx.scene.control.Alert;              // Popup-Nachrichten
-import javafx.scene.control.Button;             // Schaltflächen
-import javafx.scene.control.Label;              // Texte
-import javafx.scene.control.ListView;           // Liste der Karten
-import javafx.scene.control.TextField;          // Eingabefelder
-import javafx.scene.layout.GridPane;            // Tabellen-Layout
-import javafx.scene.layout.HBox;                // Horizontales Layout
-import javafx.scene.layout.VBox;                // Vertikales Layout
-import javafx.stage.Stage;                      // Das Fenster
-import studycards.datenbank.DatenbankManager;  // Datenbankzugriff
-import studycards.model.Lernkarte;             // Lernkarten-Klasse
-import studycards.model.Lernset;               // Lernset-Klasse
+import javafx.collections.FXCollections;  // für die beobachtbare liste
+import javafx.collections.ObservableList; // liste die sich automatisch aktualisiert
+import javafx.geometry.Insets;            // Abstände
+import javafx.scene.Scene;               // die szene
+import javafx.scene.control.Alert;       // popups
+import javafx.scene.control.Button;      // buttons
+import javafx.scene.control.Label;       // texte
+import javafx.scene.control.ListView;    // liste der karten
+import javafx.scene.control.TextField;   // eingabefelder
+import javafx.scene.layout.GridPane;     // tabellen-layout für die eingabefelder
+import javafx.scene.layout.HBox;         // elemente nebeneinander
+import javafx.scene.layout.VBox;         // elemente untereinander
+import javafx.stage.Stage;               // das fenster
+import studycards.datenbank.DatenbankManager; // datenbankzugriff
+import studycards.model.Lernkarte;            // lernkarten klasse
+import studycards.model.Lernset;              // lernset klasse
 
-import java.util.List; // Für Listen
+import java.util.List; // für listen
 
 /**
- * Fenster zum Verwalten der Karten innerhalb eines Lernsets.
+ * Fenster zum Verwalten der Karten in einem Lernset.
  * Man kann neue Karten anlegen, bestehende bearbeiten und löschen.
  */
 public class KartenVerwaltung {
 
-    // ----- Felder -----
-    private Stage fenster;                          // Das Fenster
-    private DatenbankManager datenbank;             // Datenbankzugriff
-    private Lernset aktuellesSet;                   // Das Lernset das wir bearbeiten
-    private ListView<Lernkarte> kartenListe;        // Liste der Karten
-    private ObservableList<Lernkarte> kartenDaten;  // Daten für die Liste
+    // -- variablen --
+    private Stage fenster;
+    private DatenbankManager datenbank;
+    private Lernset aktuellesSet;                    // das set dessen karten wir gerade bearbeiten
+    private ListView<Lernkarte> kartenListe;
+    private ObservableList<Lernkarte> kartenDaten;
+
+    // ich speichere hier die id der karte die gerade bearbeitet wird
+    // -1 bedeutet: es wird gerade keine karte bearbeitet
+    private int bearbeitenId = -1;
 
     /**
      * Erstellt das Kartenverwaltungs-Fenster.
-     * @param fenster   Das Fenster
-     * @param datenbank Der Datenbankmanager
-     * @param lernset   Das Lernset dessen Karten verwaltet werden
+     * @param fenster   das fenster
+     * @param datenbank der datenbankmanager
+     * @param lernset   das lernset dessen karten verwaltet werden
      */
     public KartenVerwaltung(Stage fenster, DatenbankManager datenbank, Lernset lernset) {
-        this.fenster      = fenster;   // Fenster merken
-        this.datenbank    = datenbank; // Datenbank merken
-        this.aktuellesSet = lernset;   // Lernset merken
+        this.fenster      = fenster;
+        this.datenbank    = datenbank;
+        this.aktuellesSet = lernset;
     }
 
     /**
@@ -54,115 +55,111 @@ public class KartenVerwaltung {
      */
     public void zeige() {
 
-        // ----- Überschrift -----
+        // Überschrift mit dem namen des sets
         Label überschrift = new Label("Karten verwalten: " + aktuellesSet.getName());
-        überschrift.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;"); // Gross und fett
+        überschrift.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
-        // ----- Liste der vorhandenen Karten -----
-        kartenListe = new ListView<>();                           // Neue Liste erstellen
-        kartenDaten = FXCollections.observableArrayList();       // Datencontainer
-        kartenListe.setItems(kartenDaten);                       // Liste mit Daten verbinden
-        kartenListe.setPrefHeight(250);                          // Listenhöhe setzen
-        kartenListeAktualisieren();                              // Karten aus DB laden
+        // liste mit allen karten des sets
+        kartenListe = new ListView<>();
+        kartenDaten = FXCollections.observableArrayList();
+        kartenListe.setItems(kartenDaten);
+        kartenListe.setPrefHeight(250);
+        kartenListeAktualisieren(); // karten aus der datenbank laden
 
-        // ----- Eingabebereich für neue Karten -----
-        Label frageLabel = new Label("Frage:");          // Beschriftung
-        TextField frageEingabe = new TextField();         // Textfeld für die Frage
-        frageEingabe.setPromptText("Frage eingeben ...");// Platzhaltertext
-        frageEingabe.setPrefWidth(350);                  // Breite setzen
+        // eingabefelder für neue karten oder bearbeitung
+        Label frageLabel  = new Label("Frage:");
+        TextField frageEingabe = new TextField();
+        frageEingabe.setPromptText("Frage eingeben...");
+        frageEingabe.setPrefWidth(350);
 
-        Label antwortLabel = new Label("Antwort:");     // Beschriftung
-        TextField antwortEingabe = new TextField();      // Textfeld für die Antwort
-        antwortEingabe.setPromptText("Antwort eingeben ...");
+        Label antwortLabel = new Label("Antwort:");
+        TextField antwortEingabe = new TextField();
+        antwortEingabe.setPromptText("Antwort eingeben...");
         antwortEingabe.setPrefWidth(350);
 
-        // ----- Buttons -----
-        Button btnHinzufügen = new Button("Karte hinzufügen");  // Neue Karte speichern
-        Button btnLöschen    = new Button("Karte löschen");      // Karte löschen
-        Button btnBearbeiten  = new Button("Karte bearbeiten");    // Karte bearbeiten
+        // -- buttons --
+        Button btnSpeichern  = new Button("Karte hinzufügen"); // speichert neue karte oder Änderungen
+        Button btnLöschen    = new Button("Karte löschen");
+        Button btnBearbeiten = new Button("Karte bearbeiten"); // lädt die karte in die felder
 
-        // ============================================================
-        // BUTTON-AKTIONEN
-        // ============================================================
+        // -------------------------------------------------------
+        // BUTTON AKTIONEN
+        // -------------------------------------------------------
 
-        // --- Neue Karte hinzufügen ---
-        btnHinzufügen.setOnAction(e -> {
-            String frage   = frageEingabe.getText().trim();   // Eingabe auslesen
-            String antwort = antwortEingabe.getText().trim(); // Eingabe auslesen
+        // speichern button - entweder neue karte oder Änderung speichern
+        btnSpeichern.setOnAction(e -> {
+            String frage   = frageEingabe.getText().trim();
+            String antwort = antwortEingabe.getText().trim();
 
-            if (!frage.isEmpty() && !antwort.isEmpty()) { // Beide Felder benötigt
-                datenbank.karteSpeichern(frage, antwort, aktuellesSet.getId()); // In DB speichern
-                frageEingabe.clear();   // Frage-Feld leeren
-                antwortEingabe.clear(); // Antwort-Feld leeren
-                kartenListeAktualisieren(); // Liste aktualisieren
+            if (!frage.isEmpty() && !antwort.isEmpty()) {
+                if (bearbeitenId != -1) {
+                    // wenn bearbeitenId gesetzt ist dann eine bestehende karte aktualisieren
+                    datenbank.karteAktualisieren(bearbeitenId, frage, antwort);
+                    bearbeitenId = -1;                         // zurücksetzen
+                    btnSpeichern.setText("Karte hinzufügen"); // button text zurücksetzen
+                } else {
+                    // sonst eine neue karte anlegen
+                    datenbank.karteSpeichern(frage, antwort, aktuellesSet.getId());
+                }
+                frageEingabe.clear();   // felder leeren
+                antwortEingabe.clear();
+                kartenListeAktualisieren(); // liste neu laden
             } else {
-                // Fehlermeldung wenn Felder leer
-                new Alert(Alert.AlertType.WARNING,
-                        "Bitte sowohl Frage als auch Antwort eingeben!").show();
+                new Alert(Alert.AlertType.WARNING, "Bitte Frage und Antwort eingeben!").show();
             }
         });
 
-        // --- Karte löschen ---
+        // karte löschen
         btnLöschen.setOnAction(e -> {
             Lernkarte ausgewählt = kartenListe.getSelectionModel().getSelectedItem();
-            if (ausgewählt != null) { // Nur wenn eine Karte ausgewählt ist
-                datenbank.karteLöschen(ausgewählt.getId()); // Aus DB löschen
-                kartenListeAktualisieren();                   // Liste aktualisieren
+            if (ausgewählt != null) {
+                datenbank.karteLöschen(ausgewählt.getId());
+                kartenListeAktualisieren();
             } else {
                 new Alert(Alert.AlertType.WARNING, "Bitte zuerst eine Karte auswählen!").show();
             }
         });
 
-        // --- Karte bearbeiten - Felder mit aktuellen Werten füllen ---
+        // karte bearbeiten - werte in die felder laden damit man sie aendern kann
         btnBearbeiten.setOnAction(e -> {
             Lernkarte ausgewählt = kartenListe.getSelectionModel().getSelectedItem();
             if (ausgewählt != null) {
-                // Aktuelle Werte in die Felder laden
+                // werte der ausgewählten karte in die felder laden
                 frageEingabe.setText(ausgewählt.getFrage());
                 antwortEingabe.setText(ausgewählt.getAntwort());
 
-                // Den Hinzufügen-Button umfunktionieren zum Speichern
-                btnHinzufügen.setText("Änderungen speichern");
-                btnHinzufügen.setOnAction(speichernEvent -> {
-                    String neueFrage   = frageEingabe.getText().trim();
-                    String neueAntwort = antwortEingabe.getText().trim();
+                // id merken damit ich beim speichern weiss welche karte ich aendere
+                bearbeitenId = ausgewählt.getId();
 
-                    if (!neueFrage.isEmpty() && !neueAntwort.isEmpty()) {
-                        // Karte in der DB aktualisieren
-                        datenbank.karteAktualisieren(ausgewählt.getId(), neueFrage, neueAntwort);
-                        frageEingabe.clear();                    // Felder leeren
-                        antwortEingabe.clear();
-                        btnHinzufügen.setText("Karte hinzufügen"); // Button zurücksetzen
-                        kartenListeAktualisieren();              // Liste aktualisieren
-                    }
-                });
+                // button umbenennen damit man weiss was passiert wenn man speichert
+                btnSpeichern.setText("Änderungen speichern");
             } else {
                 new Alert(Alert.AlertType.WARNING, "Bitte zuerst eine Karte auswählen!").show();
             }
         });
 
-        // ============================================================
+        // -------------------------------------------------------
         // LAYOUT ZUSAMMENBAUEN
-        // ============================================================
+        // -------------------------------------------------------
 
-        // Eingabefelder in einem Tabellen-Layout anordnen
-        GridPane eingabeBereich = new GridPane(); // Tabellen-Layout
-        eingabeBereich.setHgap(10); // Horizontaler Abstand
-        eingabeBereich.setVgap(8);  // Vertikaler Abstand
-        eingabeBereich.add(frageLabel, 0, 0);    // Oben links: Frage-Label
-        eingabeBereich.add(frageEingabe, 1, 0);  // Oben rechts: Frage-Feld
-        eingabeBereich.add(antwortLabel, 0, 1);  // Unten links: Antwort-Label
-        eingabeBereich.add(antwortEingabe, 1, 1);// Unten rechts: Antwort-Feld
+        // eingabefelder in einem tabellen-layout anordnen
+        GridPane eingabeBereich = new GridPane();
+        eingabeBereich.setHgap(10);
+        eingabeBereich.setVgap(8);
+        eingabeBereich.add(frageLabel, 0, 0);
+        eingabeBereich.add(frageEingabe, 1, 0);
+        eingabeBereich.add(antwortLabel, 0, 1);
+        eingabeBereich.add(antwortEingabe, 1, 1);
 
-        // Buttons nebeneinander
-        HBox buttons = new HBox(8, btnHinzufügen, btnLöschen, btnBearbeiten);
+        // buttons nebeneinander
+        HBox buttons = new HBox(8, btnSpeichern, btnLöschen, btnBearbeiten);
 
-        // Alles untereinander im Hauptlayout
-        VBox layout = new VBox(12); // 12 Pixel Abstand
-        layout.setPadding(new Insets(20)); // 20 Pixel Rand
+        // alles untereinander
+        VBox layout = new VBox(12);
+        layout.setPadding(new Insets(20));
         layout.getChildren().addAll(überschrift, kartenListe, eingabeBereich, buttons);
 
-        // Fenster anzeigen
+        // fenster anzeigen
         Scene szene = new Scene(layout, 620, 520);
         fenster.setTitle("Karten verwalten - " + aktuellesSet.getName());
         fenster.setScene(szene);
@@ -170,11 +167,11 @@ public class KartenVerwaltung {
     }
 
     /**
-     * Lädt alle Karten des aktuellen Sets neu und aktualisiert die Liste.
+     * Lädt alle Karten des aktuellen Sets und aktualisiert die Liste.
      */
     private void kartenListeAktualisieren() {
-        kartenDaten.clear(); // Alte Einträge löschen
-        List<Lernkarte> karten = datenbank.kartenLadenFürSet(aktuellesSet.getId()); // Aus DB laden
-        kartenDaten.addAll(karten); // Neue Einträge hinzufügen
+        kartenDaten.clear();
+        List<Lernkarte> karten = datenbank.kartenLadenFürSet(aktuellesSet.getId());
+        kartenDaten.addAll(karten);
     }
 }

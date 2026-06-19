@@ -2,69 +2,66 @@ package studycards.model;
 
 /**
  * Ein Lernset ist eine Sammlung von Lernkarten.
- * Zum Beispiel: "Mathe Grundlagen" mit 20 Karten.
+ * Man kann einem Lernset mehrere Karten hinzufügen.
  */
 public class Lernset {
 
-    // ----- Felder -----
-    private int id;                  // Die Datenbank-ID des Sets
-    private String name;             // Der Name des Lernsets
-    private List<Lernkarte> karten;  // Alle Karten in diesem Set
-
-    // ----- Konstruktor -----
+    // ein lernset hat eine nummer, einen namen und eine liste mit karten
+    private int id;                  // nummer in der datenbank
+    private String name;             // der name des lernsets
+    private List<Lernkarte> karten;  // die karten die in diesem set sind
 
     /**
      * Erstellt ein neues Lernset.
-     * @param id   Die Datenbank-ID
-     * @param name Der Name des Sets
+     * @param id   die nummer aus der datenbank
+     * @param name der name des lernsets
      */
     public Lernset(int id, String name) {
-        this.id = id;                    // ID speichern
-        this.name = name;                // Name speichern
-        this.karten = new ArrayList<>(); // Leere Liste erstellen
+        this.id = id;
+        this.name = name;
+        this.karten = new ArrayList<>(); // leere liste erstellen
     }
 
-    // ----- Getter -----
+    // -- getter --
 
     /** Gibt die ID zurück */
     public int getId() {
-        return id; // ID zurückgeben
+        return id;
     }
 
     /** Gibt den Namen zurück */
     public String getName() {
-        return name; // Name zurückgeben
+        return name;
     }
 
-    /** Gibt die Kartenliste zurück */
+    /** Gibt die Liste mit den Karten zurück */
     public List<Lernkarte> getKarten() {
-        return karten; // Liste zurückgeben
+        return karten;
     }
 
-    // ----- Setter -----
+    // -- setter --
 
     /** Setzt einen neuen Namen */
     public void setName(String name) {
-        this.name = name; // Neuen Namen setzen
+        this.name = name;
     }
 
     /** Fügt eine Karte zur Liste hinzu */
     public void karteHinzufügen(Lernkarte karte) {
-        karten.add(karte); // Karte hinzufügen
+        karten.add(karte);
     }
 
-    /** Gibt die Anzahl der Karten zurück */
+    /** Gibt zurück wie viele Karten im Set sind */
     public int getAnzahlKarten() {
-        return karten.size(); // Grösse der Liste zurückgeben
+        return karten.size();
     }
 
     /**
-     * Gibt das Lernset als lesbaren Text aus.
-     * Wird in der ListView angezeigt.
-     * @return Name und Anzahl Karten
+     * Das brauche ich damit der name in der liste angezeigt wird.
+     * @return name und anzahl der karten
      */
     @Override
     public String toString() {
-        return name + "  (" + karten.size() + " Karten)"; // Name + Anzahl
+        return name + "  (" + karten.size() + " Karten)";
     }
 }
