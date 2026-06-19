@@ -98,4 +98,6 @@ Die generierte Dokumentation liegt danach unter `target/site/apidocs/index.html`
 
 ## Nutzung von KI
 
-Ich habe während des Projekts gelegentlich ChatGPT genutzt — hauptsächlich zum Brainstorming, um Konzepte zu verstehen und als Sparringspartner wenn ich nicht weiterkam. Den Code habe ich selbst geschrieben.
+Gemäß den Vorgaben der Lehrveranstaltung wird die Nutzung von KI-Tools hier dokumentiert.
+
+Im Verlauf des Projekts wurde gelegentlich ChatGPT (gpt-4o) eingesetzt. Die KI diente dabei als Hilfsmittel zum Brainstorming, zum Verständnis von Konzepten sowie als Ansprechpartner bei Fragen zu JavaFX und JDBC. Der Code wurde eigenständig entwickelt und umgesetzt.
