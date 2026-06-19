@@ -101,7 +101,15 @@ public class DatenbankManager {
             while (ergebnis.next()) {
                 int id      = ergebnis.getInt("id");      // id aus der zeile lesen
                 String name = ergebnis.getString("name"); // name aus der zeile lesen
-                liste.add(new Lernset(id, name));         // neues objekt erstellen und zur liste
+                Lernset set = new Lernset(id, name);
+
+                // karten für dieses set laden damit die anzahl in der liste stimmt
+                List<Lernkarte> karten = kartenLadenFürSet(id);
+                for (Lernkarte k : karten) {
+                    set.karteHinzufügen(k);
+                }
+
+                liste.add(set);
             }
         } catch (Exception fehler) {
             System.out.println("Fehler beim Laden: " + fehler.getMessage());
