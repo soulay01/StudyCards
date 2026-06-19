@@ -34,7 +34,7 @@ Antwort gewusst hat oder nicht. Am Ende wird ein Ergebnis angezeigt.
 | Java        | 17+      |
 | JavaFX      | 21.0.2   |
 | Maven       | 3.x      |
-| Datenbank   | MySQL 8  |
+| Datenbank   | MySQL    |
 
 ---
 
