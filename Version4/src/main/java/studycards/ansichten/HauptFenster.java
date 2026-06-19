@@ -71,9 +71,7 @@ public class HauptFenster {
         // lernmodus button soll blau sein damit man ihn sofort sieht
         btnLernmodus.setStyle("-fx-background-color: #3a7dc9; -fx-text-fill: white; -fx-font-weight: bold;");
 
-        // -------------------------------------------------------
-        // BUTTON AKTIONEN
-        // -------------------------------------------------------
+        // was passiert wenn man die buttons drückt
 
         // neues lernset erstellen
         btnNeuesSet.setOnAction(e -> {
@@ -168,9 +166,7 @@ public class HauptFenster {
             }
         });
 
-        // -------------------------------------------------------
-        // LAYOUT ZUSAMMENBAUEN
-        // -------------------------------------------------------
+        // layout
 
         // alle buttons nebeneinander
         HBox buttonLeiste = new HBox(8);

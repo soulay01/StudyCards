@@ -102,9 +102,7 @@ public class LernModus {
         btnGewusst.setVisible(false);
         btnNichtGewusst.setVisible(false);
 
-        // -------------------------------------------------------
-        // BUTTON AKTIONEN
-        // -------------------------------------------------------
+        // button aktionen
 
         // antwort aufdecken - label sichtbar machen und buttons tauschen
         btnAntwortZeigen.setOnAction(e -> {
@@ -127,9 +125,7 @@ public class LernModus {
             nächsteKarte(); // nächste karte laden
         });
 
-        // -------------------------------------------------------
-        // LAYOUT
-        // -------------------------------------------------------
+        // layout
 
         // bewertungs-buttons nebeneinander und zentriert
         HBox bewertung = new HBox(20, btnGewusst, btnNichtGewusst);

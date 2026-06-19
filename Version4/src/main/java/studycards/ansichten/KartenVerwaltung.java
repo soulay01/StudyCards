@@ -82,9 +82,7 @@ public class KartenVerwaltung {
         Button btnLöschen    = new Button("Karte löschen");
         Button btnBearbeiten = new Button("Karte bearbeiten"); // lädt die karte in die felder
 
-        // -------------------------------------------------------
-        // BUTTON AKTIONEN
-        // -------------------------------------------------------
+        // button aktionen
 
         // speichern button - entweder neue karte oder Änderung speichern
         btnSpeichern.setOnAction(e -> {
@@ -138,9 +136,7 @@ public class KartenVerwaltung {
             }
         });
 
-        // -------------------------------------------------------
-        // LAYOUT ZUSAMMENBAUEN
-        // -------------------------------------------------------
+        // layout
 
         // eingabefelder in einem tabellen-layout anordnen
         GridPane eingabeBereich = new GridPane();
