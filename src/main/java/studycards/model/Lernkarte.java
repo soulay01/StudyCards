@@ -19,15 +19,14 @@ public class Lernkarte {
      * @param antwort   die antwort
      * @param lernsetId die id des lernsets zu dem die karte gehört
      */
-    public Lernkarte(int id, String frage, String antwort, int lernsetId)
-        // alles in die variablen speichern
+    public Lernkarte(int id, String frage, String antwort, int lernsetId) {
         this.id = id;
         this.frage = frage;
         this.antwort = antwort;
         this.lernsetId = lernsetId;
     }
 
-    // -- getter methoden, die geben die werte zurück --
+    // -- getter methoden --
 
     /** Gibt die ID zurück */
     public int getId() {
@@ -35,7 +34,7 @@ public class Lernkarte {
     }
 
     /** Gibt die Frage zurück */
-    public String getFrage() {
+    public getFrage() {
         return frage;
     }
 
@@ -49,7 +48,7 @@ public class Lernkarte {
         return lernsetId;
     }
 
-    // -- setter methoden, die aendern die werte --
+    // -- setter methoden --
 
     /** Setzt eine neue Frage */
     public void setFrage(String frage) {

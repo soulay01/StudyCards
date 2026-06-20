@@ -1,5 +1,8 @@
 package studycards.model;
 
+import java.util.ArrayList; // das brauche ich für die liste
+import java.util.List;      // das ist das listen-interface
+
 /**
  * Ein Lernset ist eine Sammlung von Lernkarten.
  * Man kann einem Lernset mehrere Karten hinzufügen.
@@ -19,7 +22,7 @@ public class Lernset {
     public Lernset(int id, String name) {
         this.id = id;
         this.name = name;
-        this.karten = new ArrayList<>(); // leere liste erstellen
+        this.karten = new ArrayList<>();
     }
 
     // -- getter --
@@ -35,7 +38,7 @@ public class Lernset {
     }
 
     /** Gibt die Liste mit den Karten zurück */
-    public List<Lernkarte> getKarten() {
+    public List<Lernset> getKarten() {
         return karten;
     }
 

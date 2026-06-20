@@ -2,7 +2,7 @@ package studycards.datenbank;
 
 // das hier ist die klasse die alles mit der datenbank macht
 
-import java.sql.Conection;         // das braucht man für die datenbankverbindung
+import java.sql.Connection;        // das braucht man für die datenbankverbindung
 import java.sql.DriverManager;     // damit kann man sich verbinden
 import java.sql.PreparedStatement; // das ist für sql befehle mit variablen
 import java.sql.ResultSet;         // das sind die ergebnisse aus der datenbank
@@ -18,13 +18,13 @@ import studycards.model.Lernset;   // meine lernset klasse
  */
 public class DatenbankManager {
 
-    // -- verbindungsdaten für die datenbank --
+    // -- verbindungsdaten für mysql --
     private static final String URL      = "jdbc:mysql://localhost:3306/studycards";
     private static final String BENUTZER = "root"; // mysql benutzername
     private static final String PASSWORT = "";      // kein passwort
 
     // die verbindung zur datenbank speichere ich hier
-    private Conection verbindung;
+    private Connection verbindung;
 
     // -------------------------------------------------------
     // VERBINDUNG
@@ -36,7 +36,6 @@ public class DatenbankManager {
      */
     public void verbinden() {
         try {
-            // mit drivermanager kann man sich zur datenbank verbinden
             verbindung = DriverManager.getConnection(URL, BENUTZER, PASSWORT);
             System.out.println("Datenbank verbunden!");
         } catch (Exception fehler) {
@@ -52,7 +51,6 @@ public class DatenbankManager {
         try {
             Statement stmt = verbindung.createStatement();
 
-            // tabelle für die lernsets
             String sqlSets =
                 "CREATE TABLE IF NOT EXISTS lernsets (" +
                 "id INT AUTO_INCREMENT PRIMARY KEY, " +
@@ -60,7 +58,6 @@ public class DatenbankManager {
                 ")";
             stmt.execute(sqlSets);
 
-            // tabelle für die lernkarten
             String sqlKarten =
                 "CREATE TABLE IF NOT EXISTS lernkarten (" +
                 "id INT AUTO_INCREMENT PRIMARY KEY, " +
@@ -90,8 +87,9 @@ public class DatenbankManager {
 
         try {
             String sql = "SELECT id, name FROM lernsets ORDER BY name";
-            Statement stmt     = verbindung.createStatement();
-            ResultSet ergebnis = stmt.executeQuery(sql);
+            Statement stmt = verbindung.createStatement();
+
+            ResultSet ergebnis = stmt.executeUpdate(sql); // alle lernsets laden
 
             while (ergebnis.next()) {
                 int id      = ergebnis.getInt("id");

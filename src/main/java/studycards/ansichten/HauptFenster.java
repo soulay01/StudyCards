@@ -51,7 +51,7 @@ public class HauptFenster {
     public void zeige() {
 
         // Überschrift oben im fenster
-        Label überschrift = new Label("Meine Lernsets :D");
+        Label überschrift = new Label("Meine Lernsets");
         überschrift.setStyle("-fx-font-size: 22px; -fx-font-weight: bold;");
 
         // liste mit allen lernsets
@@ -68,7 +68,7 @@ public class HauptFenster {
         Button btnKarten     = new Button("Karten verwalten");
         Button btnLernmodus  = new Button("Lernmodus starten");
 
-        // lernmodus button sollte blau sein damit man ihn sofort sieht
+        // lernmodus button soll blau sein damit man ihn sofort sieht
         btnLernmodus.setStyle("-fx-background-color: #3a7dc9; -fx-text-fill: white; -fx-font-weight: bold;");
 
         // -------------------------------------------------------

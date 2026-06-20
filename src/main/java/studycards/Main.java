@@ -2,15 +2,16 @@ package studycards;
 
 // das hier ist mein hauptprogramm, hier startet alles
 
-import javafx.stage.Stage;                     // das ist das fenster
-import studycards.datenbank.DatenbankManager;  // meine klasse die die datenbank macht
-import studycards.ansichten.HauptFenster;      // das erste fenster das der nutzer sieht
+import javafx.application.Application; // das muss man importieren damit javafx funktioniert
+import javafx.stage.Stage;             // das ist das fenster
+import studycards.datenbank.DatenbankManager; // meine klasse die die datenbank macht
+import studycards.ansichten.HauptFenster;     // das erste fenster das der nutzer sieht
 
 /**
  * Das ist die Hauptklasse von StudyCards.
  * Man muss Application erweitern damit JavaFX funktioniert.
  */
-public class Main extends Applikation {
+public class Main extends Application {
 
     // den datenbankmanager speichere ich hier damit alle anderen klassen ihn benutzen können
     private static DatenbankManager datenbankManager;

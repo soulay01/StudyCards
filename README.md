@@ -1,19 +1,19 @@
 # StudyCards
 
-Mein JavaFX-Projekt für die Vorlesung. Eine App um Lernkarten zu erstellen und zu lernen.
+Lernkarten-App mit JavaFX und MySQL-Datenbank.
 
-## Was bisher da ist
+## Was neu dazugekommen ist
 
-- Projektstruktur mit Maven angelegt
-- Klassen für Lernkarte und Lernset erstellt
-- Datenbankklasse für MySQL angefangen
-- Hauptfenster und erste Ansichten begonnen
+- Datenbankverbindung zu MySQL eingebaut
+- Karten können jetzt gespeichert und geladen werden
+- Benutzeroberfläche weiterentwickelt
+- Lernmodus wird noch fertiggestellt
 
 ## Voraussetzungen
 
-- Java 17+
+- Java 17 oder höher
 - Maven
-- MySQL (lokal installiert)
+- MySQL (lokal)
 
 ## Datenbank einrichten
 
@@ -21,7 +21,12 @@ Mein JavaFX-Projekt für die Vorlesung. Eine App um Lernkarten zu erstellen und 
 CREATE DATABASE studycards;
 ```
 
-Verbindungsdaten in `DatenbankManager.java` anpassen.
+Verbindungsdaten in `DatenbankManager.java` anpassen:
+
+```java
+private static final String BENUTZER = "root";
+private static final String PASSWORT = "";
+```
 
 ## Starten
 
