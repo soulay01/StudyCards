@@ -20,13 +20,14 @@ public class Lernkarte {
      * @param lernsetId die id des lernsets zu dem die karte gehört
      */
     public Lernkarte(int id, String frage, String antwort, int lernsetId) {
+        // alles in die variablen speichern
         this.id = id;
         this.frage = frage;
         this.antwort = antwort;
         this.lernsetId = lernsetId;
     }
 
-    // -- getter methoden --
+    // -- getter methoden, die geben die werte zurück --
 
     /** Gibt die ID zurück */
     public int getId() {
@@ -34,7 +35,7 @@ public class Lernkarte {
     }
 
     /** Gibt die Frage zurück */
-    public getFrage() {
+    public String getFrage() {
         return frage;
     }
 
@@ -48,24 +49,24 @@ public class Lernkarte {
         return lernsetId;
     }
 
-    // -- setter methoden --
+    // -- setter methoden, die aendern die werte --
 
     /** Setzt eine neue Frage */
     public void setFrage(String frage) {
-        this.frage = frage;
+        this.frage = frage; // neue frage speichern
     }
 
     /** Setzt eine neue Antwort */
     public void setAntwort(String antwort) {
-        this.antwort = antwort;
+        this.antwort = antwort; // neue antwort speichern
     }
 
     /**
-     * Das brauche ich damit die karte in der liste als text angezeigt wird.
+     * Das hier brauche ich damit die karte in der liste als text angezeigt wird.
      * @return frage und antwort als text
      */
     @Override
     public String toString() {
-        return "F: " + frage + "  |  A: " + antwort;
+        return "F: " + frage + "  |  A: " + antwort; // so sieht es in der liste aus
     }
 }

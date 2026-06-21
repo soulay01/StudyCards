@@ -1,19 +1,19 @@
 # StudyCards
 
-Lernkarten-App mit JavaFX und MySQL-Datenbank.
+Desktop-App zum Erstellen und Lernen mit Lernkarten. Entwickelt mit Java und JavaFX.
 
-## Was neu dazugekommen ist
+## Aktuelle Funktionen
 
-- Datenbankverbindung zu MySQL eingebaut
-- Karten können jetzt gespeichert und geladen werden
-- Benutzeroberfläche weiterentwickelt
-- Lernmodus wird noch fertiggestellt
+- Lernsets anlegen, umbenennen und löschen
+- Karten hinzufügen, bearbeiten und löschen
+- Lernmodus mit Bewertung (gewusst / nicht gewusst)
+- MySQL-Datenbankanbindung
 
 ## Voraussetzungen
 
-- Java 17 oder höher
+- Java 17+
 - Maven
-- MySQL (lokal)
+- MySQL (Port 3306)
 
 ## Datenbank einrichten
 
@@ -24,6 +24,7 @@ CREATE DATABASE studycards;
 Verbindungsdaten in `DatenbankManager.java` anpassen:
 
 ```java
+private static final String URL      = "jdbc:mysql://localhost:3306/studycards";
 private static final String BENUTZER = "root";
 private static final String PASSWORT = "";
 ```

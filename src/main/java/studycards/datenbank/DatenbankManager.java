@@ -23,7 +23,7 @@ public class DatenbankManager {
     private static final String BENUTZER = "root"; // mysql benutzername
     private static final String PASSWORT = "";      // kein passwort
 
-    // die verbindung zur datenbank speichere ich hier
+    // die verbindung zur datenbank
     private Connection verbindung;
 
     // -------------------------------------------------------
@@ -32,7 +32,6 @@ public class DatenbankManager {
 
     /**
      * Baut die Verbindung zur Datenbank auf.
-     * Muss als erstes aufgerufen werden bevor man irgendwas anderes macht.
      */
     public void verbinden() {
         try {
@@ -45,7 +44,6 @@ public class DatenbankManager {
 
     /**
      * Erstellt die zwei Tabellen die das Programm braucht.
-     * Wenn die Tabellen schon da sind passiert nichts.
      */
     public void tabellenErstellen() {
         try {
@@ -70,7 +68,7 @@ public class DatenbankManager {
 
             System.out.println("Tabellen sind fertig!");
         } catch (Exception fehler) {
-            System.out.println("Fehler beim Erstellen der Tabellen: " + fehler.getMessage());
+            System.out.println("Fehler: " + fehler.getMessage());
         }
     }
 
@@ -87,9 +85,8 @@ public class DatenbankManager {
 
         try {
             String sql = "SELECT id, name FROM lernsets ORDER BY name";
-            Statement stmt = verbindung.createStatement();
-
-            ResultSet ergebnis = stmt.executeUpdate(sql); // alle lernsets laden
+            Statement stmt     = verbindung.createStatement();
+            ResultSet ergebnis = stmt.executeQuery(sql);
 
             while (ergebnis.next()) {
                 int id      = ergebnis.getInt("id");
@@ -110,7 +107,7 @@ public class DatenbankManager {
     public void lernsetSpeichern(String name) {
         try {
             String sql = "INSERT INTO lernsets (name) VALUES (?)";
-            PreparedStatement ps = verbindung.prepareStatement(sql);
+            PreparedStatement ps = verbindung.preparedStatement(sql); // statement vorbereiten
             ps.setString(1, name);
             ps.executeUpdate();
         } catch (Exception fehler) {
@@ -125,7 +122,7 @@ public class DatenbankManager {
     public void lernsetLöschen(int id) {
         try {
             String sql = "DELETE FROM lernsets WHERE id = ?";
-            PreparedStatement ps = verbindung.prepareStatement(sql);
+            PreparedStatement ps = verbindung.preparedStatement(sql); // statement vorbereiten
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (Exception fehler) {
@@ -141,7 +138,7 @@ public class DatenbankManager {
     public void lernsetAktualisieren(int id, String neuerName) {
         try {
             String sql = "UPDATE lernsets SET name = ? WHERE id = ?";
-            PreparedStatement ps = verbindung.prepareStatement(sql);
+            PreparedStatement ps = verbindung.preparedStatement(sql); // statement vorbereiten
             ps.setString(1, neuerName);
             ps.setInt(2, id);
             ps.executeUpdate();
@@ -164,7 +161,7 @@ public class DatenbankManager {
 
         try {
             String sql = "SELECT id, frage, antwort, lernset_id FROM lernkarten WHERE lernset_id = ?";
-            PreparedStatement ps = verbindung.prepareStatement(sql);
+            PreparedStatement ps = verbindung.preparedStatement(sql); // statement vorbereiten
             ps.setInt(1, lernsetId);
             ResultSet ergebnis = ps.executeQuery();
 
@@ -191,7 +188,7 @@ public class DatenbankManager {
     public void karteSpeichern(String frage, String antwort, int lernsetId) {
         try {
             String sql = "INSERT INTO lernkarten (frage, antwort, lernset_id) VALUES (?, ?, ?)";
-            PreparedStatement ps = verbindung.prepareStatement(sql);
+            PreparedStatement ps = verbindung.preparedStatement(sql); // statement vorbereiten
             ps.setString(1, frage);
             ps.setString(2, antwort);
             ps.setInt(3, lernsetId);
@@ -208,7 +205,7 @@ public class DatenbankManager {
     public void karteLöschen(int id) {
         try {
             String sql = "DELETE FROM lernkarten WHERE id = ?";
-            PreparedStatement ps = verbindung.prepareStatement(sql);
+            PreparedStatement ps = verbindung.preparedStatement(sql); // statement vorbereiten
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (Exception fehler) {
@@ -225,7 +222,7 @@ public class DatenbankManager {
     public void karteAktualisieren(int id, String neueFrage, String neueAntwort) {
         try {
             String sql = "UPDATE lernkarten SET frage = ?, antwort = ? WHERE id = ?";
-            PreparedStatement ps = verbindung.prepareStatement(sql);
+            PreparedStatement ps = verbindung.preparedStatement(sql); // statement vorbereiten
             ps.setString(1, neueFrage);
             ps.setString(2, neueAntwort);
             ps.setInt(3, id);

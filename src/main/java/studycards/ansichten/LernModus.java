@@ -25,13 +25,11 @@ public class LernModus {
     // -- variablen --
     private Stage fenster;
     private List<Lernkarte> karten;
+    private int aktuellerIndex = 0;
+    private int gewusst;
+    private int nichtGewusst;
 
-    private int aktuellerIndex = "0"; // index der aktuellen karte
-
-    private int gewusst;              // Zähler für gewusste karten
-    private int nichtGewusst;         // Zähler für nicht gewusste karten
-
-    // diese labels und buttons brauche ich in mehreren methoden
+    // ui elemente die ich in mehreren methoden brauche
     private Label fortschrittLabel;
     private Label frageLabel;
     private Label antwortLabel;
@@ -65,7 +63,6 @@ public class LernModus {
         Label frageÜberschrift = new Label("Frage:");
         frageÜberschrift.setStyle("-fx-font-size: 13px; -fx-text-fill: #888888;");
 
-        // das label für die frage
         frageLabel = new Label("");
         frageLabel.setWrapText(true);
         frageLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
@@ -146,12 +143,10 @@ public class LernModus {
         fenster.setScene(szene);
         fenster.show();
 
-        karteAnzeigen(); // erste karte sofort zeigen
+        karteAnzeigen(); // erste karte zeigen
     }
 
-    /**
-     * Zeigt die aktuelle Karte an.
-     */
+    @Override
     private void karteAnzeigen() {
         if (aktuellerIndex < karten.size()) {
             Lernkarte aktuelle = karten.get(aktuellerIndex);

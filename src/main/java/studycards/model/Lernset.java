@@ -22,7 +22,7 @@ public class Lernset {
     public Lernset(int id, String name) {
         this.id = id;
         this.name = name;
-        this.karten = new ArrayList<>();
+        this.karten = new ArrayList<>(); // leere liste erstellen
     }
 
     // -- getter --
@@ -38,7 +38,7 @@ public class Lernset {
     }
 
     /** Gibt die Liste mit den Karten zurück */
-    public List<Lernset> getKarten() {
+    public List<Lernkarte> getKarten() {
         return karten;
     }
 
@@ -51,12 +51,12 @@ public class Lernset {
 
     /** Fügt eine Karte zur Liste hinzu */
     public void karteHinzufügen(Lernkarte karte) {
-        karten.add(karte);
+        karten.add(karte); // karte in die liste packen
     }
 
     /** Gibt zurück wie viele Karten im Set sind */
     public int getAnzahlKarten() {
-        return karten.size();
+        return karten.size(); // laenge der liste zurückgeben
     }
 
     /**
@@ -65,6 +65,6 @@ public class Lernset {
      */
     @Override
     public String toString() {
-        return name + "  (" + karten.size() + " Karten)";
+        return name + "  (" + karten.size() + " Karten)"; // name und anzahl anzeigen
     }
 }
