@@ -7,7 +7,7 @@ package studycards.model;
 public class Lernkarte {
 
     // das sind alle informationen die eine lernkarte hat
-    private int id;         // die nummer in der datenbank
+    private int id;         // die numer in der datenbank
     private String frage;   // die frage auf der karte
     private String antwort; // die antwort auf die frage
     private int lernsetId;  // zu welchem lernset gehört die karte

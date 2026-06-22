@@ -1,36 +1,103 @@
 # StudyCards
 
-Desktop-App zum Erstellen und Lernen mit Lernkarten. Entwickelt mit Java und JavaFX.
+Eine Desktop-Anwendung zur Erstellung, Verwaltung und Nutzung digitaler Lernkarten.
+Entwickelt als Semesterprojekt im Kurs „Java Development with JavaFX".
 
-## Aktuelle Funktionen
+---
 
-- Lernsets anlegen, umbenennen und löschen
-- Karten hinzufügen, bearbeiten und löschen
-- Lernmodus mit Bewertung (gewusst / nicht gewusst)
-- MySQL-Datenbankanbindung
+## Kurzbeschreibung
 
-## Voraussetzungen
+StudyCards ermöglicht es, Lernsets mit Karten (Frage + Antwort) anzulegen und diese
+im Lernmodus interaktiv abzufragen. Nach jeder Karte bewertet der Benutzer ob er die
+Antwort gewusst hat oder nicht. Am Ende wird ein Ergebnis angezeigt.
 
-- Java 17+
-- Maven
-- MySQL (Port 3306)
+---
 
-## Datenbank einrichten
+## Funktionen
+
+**Verwaltung**
+- Lernsets erstellen, umbenennen und löschen
+- Karten einem Lernset hinzufügen, bearbeiten und löschen
+
+**Lernmodus**
+- Frage anzeigen
+- Antwort aufdecken
+- Bewertung: „Gewusst" oder „Nicht gewusst"
+- Ergebnisanzeige am Ende
+
+---
+
+## Technische Anforderungen
+
+| Technologie | Version  |
+|-------------|----------|
+| Java        | 17+      |
+| JavaFX      | 21.0.2   |
+| Maven       | 3.x      |
+| Datenbank   | MySQL    |
+
+---
+
+## Projektstruktur
+
+```
+src/main/java/studycards/
+├── Main.java                        # Einstiegspunkt der Anwendung
+├── model/
+│   ├── Lernkarte.java               # Datenmodell: eine Lernkarte (Frage + Antwort)
+│   └── Lernset.java                 # Datenmodell: eine Sammlung von Karten
+├── datenbank/
+│   └── DatenbankManager.java        # MySQL-Verbindung und alle CRUD-Operationen
+└── ansichten/
+    ├── HauptFenster.java            # Übersicht aller Lernsets
+    ├── KartenVerwaltung.java        # Karten eines Sets verwalten
+    └── LernModus.java               # Lernmodus mit Bewertung
+```
+
+---
+
+## Datenbank einrichten (MySQL)
+
+1. MySQL starten
+2. Datenbank anlegen:
 
 ```sql
 CREATE DATABASE studycards;
 ```
 
-Verbindungsdaten in `DatenbankManager.java` anpassen:
+3. Verbindungsdaten in `DatenbankManager.java` anpassen:
 
 ```java
 private static final String URL      = "jdbc:mysql://localhost:3306/studycards";
-private static final String BENUTZER = "root";
-private static final String PASSWORT = "";
+private static final String BENUTZER = "root";    // eigenen Benutzernamen eintragen
+private static final String PASSWORT = "";         // eigenes Passwort eintragen
 ```
+
+Die Tabellen (`lernsets` und `lernkarten`) werden beim ersten Start automatisch erstellt.
+
+---
 
 ## Starten
 
 ```bash
+# Im Projektordner (Version4/)
 mvn javafx:run
 ```
+
+---
+
+## Javadoc generieren
+
+```bash
+mvn javadoc:javadoc
+```
+
+Die generierte Dokumentation liegt danach unter `target/site/apidocs/index.html`.
+
+---
+
+## Nutzung von KI
+
+Gemäß den Vorgaben der Lehrveranstaltung wird die Nutzung von KI-Tools hier dokumentiert.
+
+Im Verlauf des Projekts wurde gelegentlich ChatGPT (gpt-4o) eingesetzt. Die KI diente dabei als Hilfsmittel zum Brainstorming, zum Verständnis von Konzepten sowie als Ansprechpartner bei Fragen zu JavaFX und JDBC. Der Code wurde eigenständig entwickelt und umgesetzt.

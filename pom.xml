@@ -11,10 +11,10 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <javafx.version>17.0.2</javafx.version>
+        <javafx.version>21.0.2</javafx.version>
     </properties>
 
     <dependencies>
@@ -25,11 +25,11 @@
             <version>${javafx.version}</version>
         </dependency>
 
-        <!-- MySQL Treiber fuer die Datenbank -->
+        <!-- MySQL Connector fuer die Datenbankverbindung -->
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.33</version>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>9.1.0</version>
         </dependency>
     </dependencies>
 
@@ -42,6 +42,19 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>studycards.Main</mainClass>
+                </configuration>
+            </plugin>
+
+            <!-- Plugin fuer die automatische Javadoc-Generierung -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.6.3</version>
+                <configuration>
+                    <source>21</source>
+                    <encoding>UTF-8</encoding>
+                    <docencoding>UTF-8</docencoding>
+                    <charset>UTF-8</charset>
                 </configuration>
             </plugin>
         </plugins>

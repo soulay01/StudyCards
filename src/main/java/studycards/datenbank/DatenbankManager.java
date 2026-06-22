@@ -1,6 +1,7 @@
 package studycards.datenbank;
 
 // das hier ist die klasse die alles mit der datenbank macht
+// ich benutze mysql als datenbank
 
 import java.sql.Connection;        // das braucht man für die datenbankverbindung
 import java.sql.DriverManager;     // damit kann man sich verbinden
@@ -18,12 +19,13 @@ import studycards.model.Lernset;   // meine lernset klasse
  */
 public class DatenbankManager {
 
-    // -- verbindungsdaten für mysql --
+    // -- verbindungsdaten für die datenbank --
+    // verbindung zu mysql, muss vorher gestartet sein
     private static final String URL      = "jdbc:mysql://localhost:3306/studycards";
-    private static final String BENUTZER = "root"; // mysql benutzername
-    private static final String PASSWORT = "";      // kein passwort
+    private static final String BENUTZER = "root"; // mysql benutzername anpassen falls noetig
+    private static final String PASSWORT = "";     // mysql passwort hier eintragen
 
-    // die verbindung zur datenbank
+    // die verbindung zur datenbank speichere ich hier
     private Connection verbindung;
 
     // -------------------------------------------------------
@@ -32,43 +34,49 @@ public class DatenbankManager {
 
     /**
      * Baut die Verbindung zur Datenbank auf.
+     * Muss als erstes aufgerufen werden bevor man irgendwas anderes macht.
      */
     public void verbinden() {
         try {
+            // mit drivermanager kann man sich zur datenbank verbinden
             verbindung = DriverManager.getConnection(URL, BENUTZER, PASSWORT);
-            System.out.println("Datenbank verbunden!");
+            System.out.println("Datenbank verbunden!"); // zur Kontrole ausgeben
         } catch (Exception fehler) {
+            // wenn was schiefgeht den fehler ausgeben
             System.out.println("Fehler bei der Verbindung: " + fehler.getMessage());
         }
     }
 
     /**
      * Erstellt die zwei Tabellen die das Programm braucht.
+     * Wenn die Tabellen schon da sind passiert nichts.
      */
     public void tabellenErstellen() {
         try {
-            Statement stmt = verbindung.createStatement();
+            Statement stmt = verbindung.createStatement(); // statement objekt erstellen
 
+            // tabelle für die lernsets anlegen
             String sqlSets =
                 "CREATE TABLE IF NOT EXISTS lernsets (" +
-                "id INT AUTO_INCREMENT PRIMARY KEY, " +
-                "name VARCHAR(200) NOT NULL" +
+                "id INT AUTO_INCREMENT PRIMARY KEY, " + // automatische id nummer
+                "name VARCHAR(200) NOT NULL" +          // der name des sets
                 ")";
             stmt.execute(sqlSets);
 
+            // tabelle für die lernkarten anlegen
             String sqlKarten =
                 "CREATE TABLE IF NOT EXISTS lernkarten (" +
-                "id INT AUTO_INCREMENT PRIMARY KEY, " +
-                "frage TEXT NOT NULL, " +
-                "antwort TEXT NOT NULL, " +
-                "lernset_id INT, " +
-                "FOREIGN KEY (lernset_id) REFERENCES lernsets(id) ON DELETE CASCADE" +
+                "id INT AUTO_INCREMENT PRIMARY KEY, " +                                // id
+                "frage TEXT NOT NULL, " +                                               // die frage
+                "antwort TEXT NOT NULL, " +                                             // die antwort
+                "lernset_id INT, " +                                                    // welches set
+                "FOREIGN KEY (lernset_id) REFERENCES lernsets(id) ON DELETE CASCADE" + // wenn set geloescht wird, karten auch
                 ")";
             stmt.execute(sqlKarten);
 
-            System.out.println("Tabellen sind fertig!");
+            System.out.println("Tabellen sind fertig!"); // kontrolle
         } catch (Exception fehler) {
-            System.out.println("Fehler: " + fehler.getMessage());
+            System.out.println("Fehler beim Erstellen der Tabellen: " + fehler.getMessage());
         }
     }
 
@@ -81,23 +89,33 @@ public class DatenbankManager {
      * @return eine liste mit allen lernsets
      */
     public List<Lernset> alleLernseteLaden() {
-        List<Lernset> liste = new ArrayList<>();
+        List<Lernset> liste = new ArrayList<>(); // leere liste
 
         try {
+            // alle sets aus der datenbank holen, alphabetisch sortiert
             String sql = "SELECT id, name FROM lernsets ORDER BY name";
             Statement stmt     = verbindung.createStatement();
-            ResultSet ergebnis = stmt.executeQuery(sql);
+            ResultSet ergebnis = stmt.executeQuery(sql); // anfrage ausfuehren
 
+            // alle zeilen aus dem ergebnis durchgehen
             while (ergebnis.next()) {
-                int id      = ergebnis.getInt("id");
-                String name = ergebnis.getString("name");
-                liste.add(new Lernset(id, name));
+                int id      = ergebnis.getInt("id");      // id aus der zeile lesen
+                String name = ergebnis.getString("name"); // name aus der zeile lesen
+                Lernset set = new Lernset(id, name);
+
+                // karten für dieses set laden damit die anzahl in der liste stimmt
+                List<Lernkarte> karten = kartenLadenFürSet(id);
+                for (Lernkarte k : karten) {
+                    set.karteHinzufügen(k);
+                }
+
+                liste.add(set);
             }
         } catch (Exception fehler) {
             System.out.println("Fehler beim Laden: " + fehler.getMessage());
         }
 
-        return liste;
+        return liste; // liste zurückgeben
     }
 
     /**
@@ -106,10 +124,11 @@ public class DatenbankManager {
      */
     public void lernsetSpeichern(String name) {
         try {
+            // ich benutze preparedstatement damit man variablen sicher einsetzen kann
             String sql = "INSERT INTO lernsets (name) VALUES (?)";
-            PreparedStatement ps = verbindung.preparedStatement(sql); // statement vorbereiten
-            ps.setString(1, name);
-            ps.executeUpdate();
+            PreparedStatement ps = verbindung.prepareStatement(sql);
+            ps.setString(1, name); // das fragezeichen durch den namen ersetzen
+            ps.executeUpdate();    // speichern
         } catch (Exception fehler) {
             System.out.println("Fehler beim Speichern: " + fehler.getMessage());
         }
@@ -117,14 +136,15 @@ public class DatenbankManager {
 
     /**
      * Loescht ein Lernset aus der Datenbank.
-     * @param id die id des lernsets
+     * Die dazugehoerigen Karten werden auch automatisch geloescht.
+     * @param id die id des lernsets das geloescht werden soll
      */
     public void lernsetLöschen(int id) {
         try {
             String sql = "DELETE FROM lernsets WHERE id = ?";
-            PreparedStatement ps = verbindung.preparedStatement(sql); // statement vorbereiten
-            ps.setInt(1, id);
-            ps.executeUpdate();
+            PreparedStatement ps = verbindung.prepareStatement(sql);
+            ps.setInt(1, id);   // id einsetzen
+            ps.executeUpdate(); // löschen
         } catch (Exception fehler) {
             System.out.println("Fehler beim Loeschen: " + fehler.getMessage());
         }
@@ -138,10 +158,10 @@ public class DatenbankManager {
     public void lernsetAktualisieren(int id, String neuerName) {
         try {
             String sql = "UPDATE lernsets SET name = ? WHERE id = ?";
-            PreparedStatement ps = verbindung.preparedStatement(sql); // statement vorbereiten
-            ps.setString(1, neuerName);
-            ps.setInt(2, id);
-            ps.executeUpdate();
+            PreparedStatement ps = verbindung.prepareStatement(sql);
+            ps.setString(1, neuerName); // neuen namen einsetzen
+            ps.setInt(2, id);           // id einsetzen
+            ps.executeUpdate();         // Änderung speichern
         } catch (Exception fehler) {
             System.out.println("Fehler beim Umbenennen: " + fehler.getMessage());
         }
@@ -160,17 +180,19 @@ public class DatenbankManager {
         List<Lernkarte> liste = new ArrayList<>();
 
         try {
+            // nur die karten des angegebenen sets laden
             String sql = "SELECT id, frage, antwort, lernset_id FROM lernkarten WHERE lernset_id = ?";
-            PreparedStatement ps = verbindung.preparedStatement(sql); // statement vorbereiten
-            ps.setInt(1, lernsetId);
-            ResultSet ergebnis = ps.executeQuery();
+            PreparedStatement ps = verbindung.prepareStatement(sql);
+            ps.setInt(1, lernsetId);        // die set-id einsetzen
+            ResultSet ergebnis = ps.executeQuery(); // anfrage ausfuehren
 
+            // alle gefundenen karten durchgehen
             while (ergebnis.next()) {
                 int id         = ergebnis.getInt("id");
                 String frage   = ergebnis.getString("frage");
                 String antwort = ergebnis.getString("antwort");
                 int setId      = ergebnis.getInt("lernset_id");
-                liste.add(new Lernkarte(id, frage, antwort, setId));
+                liste.add(new Lernkarte(id, frage, antwort, setId)); // karte zur liste
             }
         } catch (Exception fehler) {
             System.out.println("Fehler beim Laden der Karten: " + fehler.getMessage());
@@ -183,16 +205,16 @@ public class DatenbankManager {
      * Speichert eine neue Lernkarte in der Datenbank.
      * @param frage     die frage
      * @param antwort   die antwort
-     * @param lernsetId die id des lernsets
+     * @param lernsetId die id des lernsets zu dem die karte gehört
      */
     public void karteSpeichern(String frage, String antwort, int lernsetId) {
         try {
             String sql = "INSERT INTO lernkarten (frage, antwort, lernset_id) VALUES (?, ?, ?)";
-            PreparedStatement ps = verbindung.preparedStatement(sql); // statement vorbereiten
-            ps.setString(1, frage);
-            ps.setString(2, antwort);
-            ps.setInt(3, lernsetId);
-            ps.executeUpdate();
+            PreparedStatement ps = verbindung.prepareStatement(sql);
+            ps.setString(1, frage);   // frage einsetzen
+            ps.setString(2, antwort); // antwort einsetzen
+            ps.setInt(3, lernsetId);  // set-id einsetzen
+            ps.executeUpdate();       // speichern
         } catch (Exception fehler) {
             System.out.println("Fehler beim Speichern der Karte: " + fehler.getMessage());
         }
@@ -205,7 +227,7 @@ public class DatenbankManager {
     public void karteLöschen(int id) {
         try {
             String sql = "DELETE FROM lernkarten WHERE id = ?";
-            PreparedStatement ps = verbindung.preparedStatement(sql); // statement vorbereiten
+            PreparedStatement ps = verbindung.prepareStatement(sql);
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (Exception fehler) {
@@ -222,7 +244,7 @@ public class DatenbankManager {
     public void karteAktualisieren(int id, String neueFrage, String neueAntwort) {
         try {
             String sql = "UPDATE lernkarten SET frage = ?, antwort = ? WHERE id = ?";
-            PreparedStatement ps = verbindung.preparedStatement(sql); // statement vorbereiten
+            PreparedStatement ps = verbindung.prepareStatement(sql);
             ps.setString(1, neueFrage);
             ps.setString(2, neueAntwort);
             ps.setInt(3, id);
