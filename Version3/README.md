@@ -1,27 +1,19 @@
-# StudyCards – Version 3
+# StudyCards
 
-Dritte Version der StudyCards-Anwendung.
-Die Fehler aus Version 2 wurden behoben, es gibt aber noch letzte kleinere Probleme.
+Desktop-App zum Erstellen und Lernen mit Lernkarten. Entwickelt mit Java und JavaFX.
 
-## Beschreibung
+## Aktuelle Funktionen
 
-StudyCards ist eine Desktop-Anwendung zum Erstellen, Verwalten und Lernen mit digitalen Lernkarten.
-Der Benutzer kann Lernsets anlegen, Karten hinzufügen und im Lernmodus die Karten abfragen.
-
-## Aktueller Stand
-
-- Modell-Klassen (Lernkarte, Lernset) fertig
-- Datenbankanbindung (MySQL) fertig
-- Hauptfenster mit Lernset-Übersicht fertig
-- Kartenverwaltung fertig
-- Lernmodus fast fertig
-- Letzte Fehler werden in Version 4 behoben
+- Lernsets anlegen, umbenennen und löschen
+- Karten hinzufügen, bearbeiten und löschen
+- Lernmodus mit Bewertung (gewusst / nicht gewusst)
+- MySQL-Datenbankanbindung
 
 ## Voraussetzungen
 
-- Java 17 oder höher
+- Java 17+
 - Maven
-- MySQL (lokal, Port 3306)
+- MySQL (Port 3306)
 
 ## Datenbank einrichten
 
@@ -29,12 +21,12 @@ Der Benutzer kann Lernsets anlegen, Karten hinzufügen und im Lernmodus die Kart
 CREATE DATABASE studycards;
 ```
 
-Verbindungsdaten in `src/main/java/studycards/datenbank/DatenbankManager.java` anpassen:
+Verbindungsdaten in `DatenbankManager.java` anpassen:
 
 ```java
 private static final String URL      = "jdbc:mysql://localhost:3306/studycards";
-private static final String BENUTZER = "root";    // Benutzername anpassen
-private static final String PASSWORT = "";         // Passwort anpassen
+private static final String BENUTZER = "root";
+private static final String PASSWORT = "";
 ```
 
 ## Starten
@@ -43,5 +35,10 @@ private static final String PASSWORT = "";         // Passwort anpassen
 mvn javafx:run
 ```
 
-> Hinweis: Diese Version kompiliert noch nicht vollständig fehlerfrei.
-> Die finale lauffähige Version ist Version 4.
+---
+
+## Nutzung von KI
+
+Gemäß den Semestervorgaben wird die Nutzung von KI-Tools hier dokumentiert.
+
+Im Verlauf des Projekts wurde ChatGPT (gpt-4o) eingesetzt. Die KI diente dabei als Sparringpartner beim Brainstorming und Verständnis von Konzepten – es wäre jedoch unehrlich zu behaupten, dass es dabei geblieben ist. Bei einzelnen, technisch anspruchsvolleren Abschnitten – insbesondere im Bereich JDBC-Anbindung und JavaFX-Eventhandling – wurde die KI auch konkret zur Umsetzung herangezogen, da diese Stellen ohne ihre Unterstützung in der gegebenen Zeit nicht realisierbar gewesen wären. Die Gesamtstruktur, das Design der Anwendung und der überwiegende Teil des Codes wurden eigenständig entwickelt und verstanden.

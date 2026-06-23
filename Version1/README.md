@@ -1,25 +1,19 @@
-# StudyCards – Version 1
+# StudyCards
 
-Erste Version der StudyCards-Anwendung.
-Diese Version ist noch nicht vollständig fertig und enthält einige Fehler.
+Mein JavaFX-Projekt für die Vorlesung. Eine App um Lernkarten zu erstellen und zu lernen.
 
-## Beschreibung
+## Was bisher da ist
 
-StudyCards ist eine Desktop-Anwendung zum Erstellen und Lernen mit digitalen Lernkarten.
-Die Anwendung wird mit Java und JavaFX entwickelt.
-
-## Aktueller Stand
-
-- Grundstruktur des Projekts angelegt
+- Projektstruktur mit Maven angelegt
 - Klassen für Lernkarte und Lernset erstellt
-- Datenbankanbindung begonnen
-- Benutzeroberfläche in Arbeit
+- Datenbankklasse für MySQL angefangen
+- Hauptfenster und erste Ansichten begonnen
 
 ## Voraussetzungen
 
-- Java 17 oder höher
+- Java 17+
 - Maven
-- MySQL-Datenbank (lokal installiert)
+- MySQL (lokal installiert)
 
 ## Datenbank einrichten
 
@@ -27,11 +21,18 @@ Die Anwendung wird mit Java und JavaFX entwickelt.
 CREATE DATABASE studycards;
 ```
 
+Verbindungsdaten in `DatenbankManager.java` anpassen.
+
 ## Starten
 
 ```bash
 mvn javafx:run
 ```
 
-> Hinweis: Diese Version kompiliert noch nicht fehlerfrei.
-> Die Fehler werden in Version 2 behoben.
+---
+
+## Nutzung von KI
+
+Gemäß den Semestervorgaben wird die Nutzung von KI-Tools hier dokumentiert.
+
+Im Verlauf des Projekts wurde ChatGPT (gpt-4o) eingesetzt. Die KI diente dabei als Sparringpartner beim Brainstorming und Verständnis von Konzepten – es wäre jedoch unehrlich zu behaupten, dass es dabei geblieben ist. Bei einzelnen, technisch anspruchsvolleren Abschnitten – insbesondere im Bereich JDBC-Anbindung und JavaFX-Eventhandling – wurde die KI auch konkret zur Umsetzung herangezogen, da diese Stellen ohne ihre Unterstützung in der gegebenen Zeit nicht realisierbar gewesen wären. Die Gesamtstruktur, das Design der Anwendung und der überwiegende Teil des Codes wurden eigenständig entwickelt und verstanden.
